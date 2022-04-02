@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+   	"http://tiles.apache.org/dtds/tiles-config_3_0.dtd"> 
+ 
+<tiles-definitions>	
+<definition name="login"
+		template="/WEB-INF/layout/login.jsp">
+	</definition>
+	
+	<definition name="main"
+		template="/WEB-INF/layout/main.jsp">
+		<put-attribute name="content" value="" />
+	</definition>
+	
+	<definition name="home" extends="main">		
+		<put-attribute name="content"
+			value="/WEB-INF/view/home.jsp" />
+				
+	</definition>
+	
+	<definition name="403" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/403.jsp" />
+	</definition>
+	
+	<definition name="changepassword" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/changepassword.jsp" />
+	</definition>
+	
+		<definition name="editphonenumber" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/editphonenumber.jsp" />
+	</definition>
+ 	
+ 	<definition name="document" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/document.jsp" />
+	</definition>
+ 	
+	<!-- view student -->
+	<definition name="sprofile" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/student/sprofile.jsp" />
+	</definition>
+	
+		<definition name="classroom" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/student/classroom.jsp" />
+	</definition>
+	
+	<definition name="classroomdetail" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/student/classroomdetail.jsp" />
+	</definition>
+	
+	<definition name="submitdocument" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/student/submitdocument.jsp" />
+	</definition>
+	
+	<definition name="editdocument" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/student/editdocument.jsp" />
+	</definition>
+	
+	<!-- view teacher -->
+	<definition name="tprofile" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/teacher/tprofile.jsp" />
+	</definition>
+	
+	<definition name="editprofile" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/teacher/editprofile.jsp" />
+	</definition>
+	
+	
+	<definition name="createclassroom" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/teacher/createclassroom.jsp" />
+	</definition>
+	
+	<definition name="teach" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/teacher/teach.jsp" />
+	</definition>
+	
+	<definition name="teachclassroom" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/teacher/teachclassroom.jsp" />
+	</definition>
+	
+</tiles-definitions>
