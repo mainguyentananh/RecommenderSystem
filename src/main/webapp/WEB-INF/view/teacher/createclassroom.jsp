@@ -13,7 +13,7 @@
 <form action="<c:url value="/teacher/createclassroom"/>"  method="POST" enctype="multipart/form-data">
 	<div class="col-8">
 	<div class="input-group">
-	  <input type="file" name="filename" class="form-control">
+	  <input type="file" name="filename" class="form-control" required="required">
 	  <input type="submit" value="Upload" class="btn btn-primary"/>
 	</div>
 	</div>

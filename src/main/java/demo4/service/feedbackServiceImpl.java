@@ -1,5 +1,7 @@
 package demo4.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,16 @@ public class feedbackServiceImpl implements feedbackService{
 	@Override
 	public void saveFeedback(feedback feedback) {
 		repo.saveFeedback(feedback);
+	}
+
+	@Override
+	public List<feedback> getFeedBackByIdDocument(int id) {
+		return repo.getFeedBackByIdDocument(id);
+	}
+
+	@Override
+	public Object avgStarDocument(int id) {
+		return repo.avgStarDocument(id);
 	}
 
 	

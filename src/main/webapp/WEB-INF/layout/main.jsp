@@ -18,7 +18,7 @@
 <link rel="icon" href="<c:url value="/static/img/logo-ctu.png"/>" />
 <!-- CSS Files -->
 <link rel="stylesheet" type="text/css"
-	href="<c:url value="/static/css/main.css"/>" />
+	href="<c:url value="/static/css/main.css?version=51"/>" />
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/static/ft/css/all.min.css"/>">
 <link
@@ -99,11 +99,16 @@
 						</div> <span class="nav-link-text ms-1">Teach</span>
 				</a></li>
 				
-				
-				
 				</sec:authorize>
 				
-				
+				<!-- Dash board Admin -->
+				<sec:authorize access="hasRole('ROLE_ADMIN')">
+					<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/admin/category"/>">
+						<div class="text-white">
+							<i class="fa-solid fa-rectangle-list"></i>
+						</div> <span class="nav-link-text ms-1">Category</span>
+				</a></li>
+				</sec:authorize>
 				
 				<hr class="text-light" />
 				<li class="nav-item"><a class="nav-link text-white "
@@ -145,11 +150,13 @@
 		</nav>
 		<!-- End Navbar -->
 		<div class="container">
+			<tiles:insertAttribute name="search" />
 			<tiles:insertAttribute name="content" />
-			
-			
-			<footer class="bg-dark text-white py-3 mt-3">
-			<div class="container">
+		
+		
+		
+		<footer class="bg-dark text-white py-3 mt-3 mb-3">
+			<div class="container"> 
 			
 				<div class="col text-center">
 					<span>Copyright &copy; MNTA</span>
@@ -157,6 +164,7 @@
 			
 			</div>
 		</footer>
+		
 		</div>
 		
 	</div>

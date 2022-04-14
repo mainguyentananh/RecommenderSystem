@@ -37,7 +37,7 @@
 	  </c:if>
 	  <c:if test="${!empty dd.dd_document}">
 	  	<td scope="col">
-	  	<a href="<c:url value="/search/document/${dd.dd_document.id}"/>" class="text-dark text-decoration-none">Đã nộp</a>
+	  	<a href="<c:url value="/document/${dd.dd_document.id}"/>" class="link-primary text-decoration-none">Đã nộp</a>
 	  	</td>
 	  </c:if>
 	  <c:if test="${dd.check == true}">

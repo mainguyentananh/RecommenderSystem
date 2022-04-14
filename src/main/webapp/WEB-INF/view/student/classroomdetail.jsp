@@ -39,27 +39,27 @@
 
 <hr/>
 <h3>Giảng viên hướng dẫn</h3>
-<div class="table-responsive">
-<table class="table table-primary table-bordered border-dark text-center">
-  <thead>
-    <tr>
-      <th scope="col">Họ tên</th>
-      <th scope="col">Mail</th>
-      <th scope="col">Học vị</th>
-      <th scope="col">Số điện thoại</th>
-      <th scope="col">Ảnh</th>
-    </tr>
-  </thead>
-  <tbody>
-   
-    <tr>
-   	  <td scope="col">${t.te_teacher.name}</td>
-      <td scope="col">${t.te_teacher.mail}</td>
-      <td scope="col">${t.te_teacher.degree}</td>
-   	  <td scope="col">${t.te_teacher.phone}</td>
-      <td scope="col"><img style="width: 150px; height: 150px;" src="<c:url value="/static/img/${t.te_teacher.image}"/>"/></td>
-    </tr>
-  </tbody>
-</table>
-</div>
 
+<div class="row">
+	<div class="col">
+			<div class="card mb-3" >
+				  <div class="row">
+				    <div class="col-4">
+				      <img src="<c:url value="/static/img/${t.te_teacher.image}"/>" class="card-img" >
+				    </div>	    
+				    <div class="col-8">
+				      <div class="card-body">
+				
+					    <p class="card-text"><strong>Họ tên:</strong> ${t.te_teacher.name}</p>
+					    <p class="card-text"><strong>Mail:</strong> ${t.te_teacher.mail}</p>
+					    <p class="card-text"><strong>Học vị:</strong>${t.te_teacher.degree}</p>
+				        <p class="card-text"><strong>Số điện thoại:</strong> ${t.te_teacher.phone}</p>
+				        
+				        
+				 
+				      </div>
+				    </div>
+				  </div>
+				</div>
+	</div>
+</div>

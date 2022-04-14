@@ -37,5 +37,9 @@ public class documentDetailServiceImpl implements documentDetailService{
 	public List<documentDetail> getDocumentDetailByClassroomId(String classroomId) {
 		return repo.getDocumentDetailByClassroomId(classroomId);
 	}
+	@Override
+	public boolean checkDocumentDetailByPrimaryKey(String classroomId, String studentId) {
+		return repo.checkDocumentDetailByPrimaryKey(classroomId, studentId);
+	}
 
 }

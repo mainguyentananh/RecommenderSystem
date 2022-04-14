@@ -10,5 +10,6 @@ public interface documentDetailService {
 	public documentDetail getDocumentDetailByPrimaryKey(String classroomId,String studentId);
 	public void updateDocumentDetail(documentDetail documentDetail);
 	public List<documentDetail> getDocumentDetailByClassroomId(String classroomId);
+	public boolean checkDocumentDetailByPrimaryKey(String classroomId,String studentId);
 	
 }

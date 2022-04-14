@@ -1,5 +1,7 @@
 package demo4.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,16 @@ public class documentServiceImpl implements documentService{
 	@Override
 	public document getDocumentById(int id) {
 		return repo.getDocumentById(id);
+	}
+
+	@Override
+	public List<document> getAllDocumentByCategory(String idcategory) {
+		return repo.getAllDocumentByCategory(idcategory);
+	}
+
+	@Override
+	public List<document> getDocumentByCategoryForHome(String idcategory) {
+		return repo.getDocumentByCategoryForHome(idcategory);
 	}
 
 	

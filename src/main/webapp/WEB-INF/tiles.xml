@@ -8,12 +8,15 @@
 		template="/WEB-INF/layout/login.jsp">
 	</definition>
 	
+	
 	<definition name="main"
 		template="/WEB-INF/layout/main.jsp">
+		<put-attribute name="search" value="" />
 		<put-attribute name="content" value="" />
 	</definition>
 	
-	<definition name="home" extends="main">		
+	<definition name="home" extends="main">
+		<put-attribute name="search" value="/WEB-INF/layout/search.jsp" />		
 		<put-attribute name="content"
 			value="/WEB-INF/view/home.jsp" />
 				
@@ -34,10 +37,20 @@
 			value="/WEB-INF/view/editphonenumber.jsp" />
 	</definition>
  	
+ 	<!-- view document -->
  	<definition name="document" extends="main">
+ 	<put-attribute name="search" value="/WEB-INF/layout/search.jsp" />
 		<put-attribute name="content"
 			value="/WEB-INF/view/document.jsp" />
 	</definition>
+	
+	<definition name="listdocument" extends="main">
+ 	<put-attribute name="search" value="/WEB-INF/layout/search.jsp" />
+		<put-attribute name="content"
+			value="/WEB-INF/view/listdocument.jsp" />
+	</definition>
+	
+	
  	
 	<!-- view student -->
 	<definition name="sprofile" extends="main">
@@ -91,5 +104,22 @@
 		<put-attribute name="content"
 			value="/WEB-INF/view/teacher/teachclassroom.jsp" />
 	</definition>
+	
+	<!-- view admin -->
+	<definition name="category" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/category.jsp" />
+	</definition>
+	
+	<definition name="createcategory" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/createcategory.jsp" />
+	</definition>
+	
+	<definition name="editcategory" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/editcategory.jsp" />
+	</definition>
+	
 	
 </tiles-definitions>

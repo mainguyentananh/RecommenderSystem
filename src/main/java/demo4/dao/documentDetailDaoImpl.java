@@ -52,6 +52,16 @@ public class documentDetailDaoImpl implements documentDetailDao{
 		return list;
 	}
 
+	@Override
+	public boolean checkDocumentDetailByPrimaryKey(String classroomId, String studentId) {
+		Session session = sessionfactory.getCurrentSession();
+		pk_documentDetail pk = new pk_documentDetail(classroomId,studentId);
+		if(session.get(documentDetail.class,pk) != null) {
+			return true;
+		}
+		return false;
+	}
+
 	
 
 }

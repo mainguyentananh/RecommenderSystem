@@ -1,5 +1,7 @@
 package demo4.dao;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,22 @@ public class documentDaoImpl implements documentDao{
 	public document getDocumentById(int id) {
 		Session session = sessionfactory.getCurrentSession();
 		return session.get(document.class, id);
+	}
+
+	@Override
+	public List<document> getAllDocumentByCategory(String idcategory) {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "From document where d_category.id like :idcategory ORDER BY id DESC";
+		List<document> list = session.createQuery(hql,document.class).setParameter("idcategory", idcategory).list();
+		return list;
+	}
+
+	@Override
+	public List<document> getDocumentByCategoryForHome(String idcategory) {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "From document where d_category.id like :idcategory ORDER BY id DESC";
+		List<document> list = session.createQuery(hql,document.class).setParameter("idcategory", idcategory).setFirstResult(0).setMaxResults(4).list();
+		return list;
 	}
 	
 	

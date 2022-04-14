@@ -2,6 +2,7 @@ package demo4.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import demo4.model.account;
+import demo4.model.category;
 import demo4.model.document;
 import demo4.model.documentDetail;
 import demo4.model.student;
@@ -66,7 +68,15 @@ public class studentController {
 	
 	
 	@GetMapping(value = "/")
-	public String home(){
+	public String home(Model md){
+		List<category> listCategory = categoryService.getAllCategory();
+		List<List<document>> listDocument = new ArrayList<List<document>>();
+		
+		for (category category : listCategory) {
+			List<document> document = documentService.getAllDocumentByCategory(category.getId());
+			listDocument.add(document);
+		}
+		md.addAttribute("listDocument", listDocument);
 		return "home";
 	}
 	

@@ -2,6 +2,7 @@ package demo4.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,7 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import demo4.model.account;
 import demo4.model.account_role;
+import demo4.model.category;
 import demo4.model.classroom;
+import demo4.model.document;
 import demo4.model.documentDetail;
 import demo4.model.documentDetail.pk_documentDetail;
 import demo4.model.student;
@@ -42,6 +45,7 @@ import demo4.service.account_roleService;
 import demo4.service.categoryService;
 import demo4.service.classroomService;
 import demo4.service.documentDetailService;
+import demo4.service.documentService;
 import demo4.service.mailService;
 import demo4.service.roleService;
 import demo4.service.studentService;
@@ -82,12 +86,23 @@ public class teacherController {
 
 	@Autowired
 	private mailService mailService;
+	
+	@Autowired
+	private documentService documentService;
 
 	@Autowired
 	private ServletContext app;
 
 	@GetMapping(value = "/")
-	public String home() {
+	public String home(Model md) {
+	List<category> listCategory = categoryService.getAllCategory();
+	List<List<document>> listDocument = new ArrayList<List<document>>();
+	
+	for (category category : listCategory) {
+		List<document> document = documentService.getDocumentByCategoryForHome(category.getId());
+		listDocument.add(document);
+	}
+	md.addAttribute("listDocument", listDocument);
 		return "home";
 	}
 
@@ -197,7 +212,7 @@ public class teacherController {
 
 			} catch (Exception e) {
 				md.addAttribute("notify",
-						"<div class=\"alert alert-warning text-center col-4 mt-2\" role=\"alert\">Cấu trúc file có lỗi</div>");
+						"<div class=\"alert alert-warning text-center col-4 mt-2\" role=\"alert\">Định dạng file không đúng</div>");
 				return "createclassroom";
 			}
 
@@ -205,8 +220,6 @@ public class teacherController {
 					"<div class=\"alert alert-success text-center col-4 mt-2\" role=\"alert\">Khởi tạo thành công</div>");
 			return "createclassroom";
 		}
-		md.addAttribute("notify",
-				"<div class=\"alert alert-danger text-center col-4 mt-2\" role=\"alert\">Khởi tạo không thành công</div>");
 		return "createclassroom";
 	}
 
@@ -317,7 +330,7 @@ public class teacherController {
 					String subject = "Computer Science - Can Tho University";
 					String content = "Dear " + readStudentId + ". Login information to the system with username: "
 							+ readStudentId + "and password: " + passwordAccount;
-					// mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
+				//	 mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
 
 				}
 
@@ -328,8 +341,9 @@ public class teacherController {
 				documentDetail.setPk_documentDetail(pk_documentDetail);
 				documentDetail.setDd_classroom(classroomService.getClassroomById(classroomId));
 				documentDetail.setDd_student(studentService.getStudentById(readStudentId));
-				documentDetailService.saveDocumentDetail(documentDetail);
-
+				if(!documentDetailService.checkDocumentDetailByPrimaryKey(classroomId, readStudentId)) {
+					documentDetailService.saveDocumentDetail(documentDetail);
+				}
 			}
 
 		}

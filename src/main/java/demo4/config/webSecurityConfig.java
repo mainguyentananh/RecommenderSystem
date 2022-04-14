@@ -53,10 +53,12 @@ public class webSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 		
 		http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll();
+		http.authorizeRequests().antMatchers("/search/document/download/source/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
 		http.authorizeRequests().antMatchers("/search/**").authenticated();
 		
 		http.authorizeRequests().antMatchers("/student/**").hasAuthority("ROLE_STUDENT");
 		http.authorizeRequests().antMatchers("/teacher/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
+		http.authorizeRequests().antMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
 		
 		http.authorizeRequests().antMatchers("/static/upload/excel/**","/static/upload/source/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
 		
