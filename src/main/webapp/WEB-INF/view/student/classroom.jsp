@@ -39,7 +39,7 @@
 			</c:if>
 			
 			 <c:if test="${!empty dd.dd_document}">
-	      <td scope="col"><a href="<c:url value="/document/${dd.dd_document.id}"/>" class="link-primary text-decoration-none" target="_blank">Đã nộp</a></td>
+	      <td scope="col"><a href="<c:url value="/document/${dd.dd_document.id}"/>" class="link-primary text-decoration-none" >Đã nộp</a></td>
 		     <td scope="col"><a href="<c:url value="/student/classroom/editdocument?classroom=${dd.dd_classroom.id}&document=${dd.dd_document.id}"/>" class="text-dark text-decoration-none">
 		    <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa</a>
 		    </td>
@@ -47,7 +47,7 @@
 	</c:if>
 	
 	<c:if test="${dd.check == true }">
-		<td scope="col"><a href="<c:url value="/document/${dd.dd_document.id}"/>" class="link-primary text-decoration-none" target="_blank">Đã nộp</a></td>
+		<td scope="col"><a href="<c:url value="/document/${dd.dd_document.id}"/>" class="link-primary text-decoration-none" >Đã nộp</a></td>
 		<td scope="col"><i class="fa-solid fa-lock"></i></td>
 	</c:if>
 

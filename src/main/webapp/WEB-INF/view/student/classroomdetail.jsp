@@ -37,7 +37,6 @@
 </table>
 </div>
 
-<hr/>
 <h3>Giảng viên hướng dẫn</h3>
 
 <div class="row">

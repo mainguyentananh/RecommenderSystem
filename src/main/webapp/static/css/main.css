@@ -1699,7 +1699,7 @@ body:not(.dark-version) .sidenav.bg-transparent .collapse .nav-item .nav-link.ac
 .listComment{
 	overflow: auto;
 	 width: 100%;
-	 height: 500px;
+	 max-height: 200px;
 }
 
 .checked {

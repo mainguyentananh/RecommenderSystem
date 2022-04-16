@@ -29,15 +29,16 @@
 
 </head>
 <body class="g-sidenav-show  bg-gray-200">
-<%@ taglib prefix="sec"
-	uri="http://www.springframework.org/security/tags"%>
-	
-<sec:authorize access="hasRole('ROLE_STUDENT')">
-	<c:set value="student" var="url"/>
-</sec:authorize>
-<sec:authorize access="hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')">
-	<c:set value="teacher" var="url"/>
-</sec:authorize>
+	<%@ taglib prefix="sec"
+		uri="http://www.springframework.org/security/tags"%>
+
+	<sec:authorize access="hasRole('ROLE_STUDENT')">
+		<c:set value="student" var="url" />
+	</sec:authorize>
+	<sec:authorize
+		access="hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')">
+		<c:set value="teacher" var="url" />
+	</sec:authorize>
 
 
 
@@ -55,12 +56,12 @@
 
 			</a>
 		</div>
-		
+
 		<div class="collapse navbar-collapse " id="sidenav-collapse-main">
 			<ul class="navbar-nav">
-				
-				
-				<!-- Dash board main -->	
+
+
+				<!-- Dash board main -->
 				<li class="nav-item"><a
 					class="nav-link text-white active bg-primary"
 					href="<c:url value="/${url}/"/>">
@@ -69,47 +70,53 @@
 						</div> <span class="nav-link-text ms-1">Home</span>
 
 				</a></li>
-				<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/${url}/profile"/>">
+				<li class="nav-item"><a class="nav-link text-white "
+					href="<c:url value="/${url}/profile"/>">
 						<div class="text-white">
 							<i class="fa-solid fa-address-card"></i>
 						</div> <span class="nav-link-text ms-1">Profile</span>
 				</a></li>
-				
-				<!-- Dash board Student -->	
+
+				<!-- Dash board Student -->
 				<sec:authorize access="hasRole('ROLE_STUDENT')">
-					<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/${url}/classroom"/>">
-						<div class="text-white">
-							<i class="fa-solid fa-id-card-clip"></i>
-						</div> <span class="nav-link-text ms-1">Classroom</span>
-				</a></li>
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/${url}/classroom"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-id-card-clip"></i>
+							</div> <span class="nav-link-text ms-1">Classroom</span>
+					</a></li>
 				</sec:authorize>
-				
-				
-				<!-- Dash board Teacher -->	
-				<sec:authorize access="hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')">
-					<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/${url}/createclassroom"/>">
-						<div class="text-white">
-							<i class="fa-solid fa-square-plus"></i>
-						</div> <span class="nav-link-text ms-1">Create Classroom</span>
-				</a></li>
-				
-				<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/${url}/teach"/>">
-						<div class="text-white">
-							<i class="fa-solid fa-chalkboard-user"></i>
-						</div> <span class="nav-link-text ms-1">Teach</span>
-				</a></li>
-				
+
+
+				<!-- Dash board Teacher -->
+				<sec:authorize
+					access="hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')">
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/${url}/createclassroom"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-square-plus"></i>
+							</div> <span class="nav-link-text ms-1">Create Classroom</span>
+					</a></li>
+
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/${url}/teach"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-chalkboard-user"></i>
+							</div> <span class="nav-link-text ms-1">Teach</span>
+					</a></li>
+
 				</sec:authorize>
-				
+
 				<!-- Dash board Admin -->
 				<sec:authorize access="hasRole('ROLE_ADMIN')">
-					<li class="nav-item"><a class="nav-link text-white " href="<c:url value="/admin/category"/>">
-						<div class="text-white">
-							<i class="fa-solid fa-rectangle-list"></i>
-						</div> <span class="nav-link-text ms-1">Category</span>
-				</a></li>
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/admin/category"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-rectangle-list"></i>
+							</div> <span class="nav-link-text ms-1">Category</span>
+					</a></li>
 				</sec:authorize>
-				
+
 				<hr class="text-light" />
 				<li class="nav-item"><a class="nav-link text-white "
 					href="<c:url value="/logout"/>">
@@ -118,6 +125,10 @@
 						</div> <span class="nav-link-text ms-1">Logout</span>
 				</a></li>
 			</ul>
+							<footer class="bg-dark text-white py-3 mb-3 position-absolute bottom-0 start-50 translate-middle-x " style="width: 200px;">
+  <div class="col text-center "><span>Copyright &copy; MNTA</span>
+  </div>
+</footer>
 		</div>
 	</div>
 	<div class="main-content ">
@@ -130,8 +141,9 @@
 						class="ms-md-auto pe-md-3 d-flex navbar-nav  justify-content-end">
 						<li class="nav-item d-flex align-items-center"><a href="#"
 							class="nav-link text-body font-weight-bold px-0"> <span>Xin
-									chào: <a class="nav-link text-dark " href="<c:url value="/${url}/profile"/>"> <strong>${pageContext.request.userPrincipal.name}</strong>
-							</a>
+									chào: <a class="nav-link text-dark "
+									href="<c:url value="/${url}/profile"/>"> <strong>${pageContext.request.userPrincipal.name}</strong>
+								</a>
 							</span>
 						</a></li>
 						<li class="nav-item d-xl-none ps-3 d-flex align-items-center">
@@ -152,21 +164,9 @@
 		<div class="container">
 			<tiles:insertAttribute name="search" />
 			<tiles:insertAttribute name="content" />
-		
-		
-		
-		<footer class="bg-dark text-white py-3 mt-3 mb-3">
-			<div class="container"> 
-			
-				<div class="col text-center">
-					<span>Copyright &copy; MNTA</span>
-				</div>
-			
-			</div>
-		</footer>
-		
+
 		</div>
-		
+
 	</div>
 
 
@@ -176,7 +176,7 @@
 
 	<script type="text/javascript"
 		src="<c:url value="/static/js/perfect-scrollbar.min.js" />"></script>
-		
-	
+
+
 </body>
 </html>

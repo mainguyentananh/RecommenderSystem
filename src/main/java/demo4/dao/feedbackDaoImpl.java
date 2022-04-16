@@ -34,8 +34,7 @@ public class feedbackDaoImpl implements feedbackDao{
 	public Object avgStarDocument(int id) {
 		Session session = sessionfactory.getCurrentSession();
 		String hql = "select round(avg(score)) from feedback where score > 0 and f_document.id =:id";
-		double object =  (double) session.createQuery(hql).setParameter("id", id).uniqueResult();
-		int result = (int) Math.round(object);
+		Object result = session.createQuery(hql,Object.class).setParameter("id", id).uniqueResult();
 		return result;
 	}
 

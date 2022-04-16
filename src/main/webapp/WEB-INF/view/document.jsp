@@ -69,27 +69,24 @@
 	</div>
 </div>
 
-<div class="container">
 	<h4>Các bình luận về tài liệu</h4>
-	
+	<c:if test="${!empty listFeedback}">
 	<div class="listComment">
 		<c:forEach items="${listFeedback}" var="l">
-		
-			<c:if test="${!empty l.comment }">
+		<c:if test="${!empty l.comment}">
 				<strong>${l.f_account.username}:</strong> ${l.comment}
 		<br />
-			</c:if>
+	</c:if>
 		</c:forEach>
 	</div>
-	
-</div>
+	</c:if>
 
 <form action="<c:url value="/document/${document.id}"/>"
 	method="POST" class="mt-3">
 	<div class="form-floating">
 		<textarea class="form-control" name="comment"
 			placeholder="Leave a comment here" id="floatingTextarea2"
-			style="height: 100px"></textarea>
+			style="height: 100px" required="required"></textarea>
 		<label for="floatingTextarea2">Comment</label>
 	</div>
 	<input class="btn btn-primary mt-2" type="submit" value="Comment">

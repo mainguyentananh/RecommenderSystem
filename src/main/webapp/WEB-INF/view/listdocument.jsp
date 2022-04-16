@@ -44,7 +44,7 @@
 							<strong>Học phần:</strong> ${list.d_category.id} -
 							${list.d_category.name}
 						</p>
-						<a href="<c:url value="/document/${list.id}"/>" class="link-primary text-decoration-none" target="_blank">Xem chi tiết</a>
+						<a href="<c:url value="/document/${list.id}"/>" class="link-primary text-decoration-none">Xem chi tiết</a>
 					</div>
 				</div>
 				

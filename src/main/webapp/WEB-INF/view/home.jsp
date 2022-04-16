@@ -16,7 +16,7 @@
 		<h4 class="mb-1">${document[0].d_category.name}</h4>
 		<div class="list-group">
 			<c:forEach items="${document}" var="d">
-				  <a href="<c:url value="/document/${d.id}"/>" class="list-group-item list-group-item-action" target="_blank">
+				  <a href="<c:url value="/document/${d.id}"/>" class="list-group-item list-group-item-action">
 				  	<div class="row">
 				  		<div class="col-lg-2 col-md-4 ">
 				  				   <img src="<c:url value="/static/img/document.jpg"/>"

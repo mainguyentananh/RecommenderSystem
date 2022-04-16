@@ -60,8 +60,14 @@ public class documentController {
 	public String getDocument(@PathVariable(value = "id") int id, Model md) {
 		document document = documentService.getDocumentById(id);
 		List<feedback> listFeedback = feedbackService.getFeedBackByIdDocument(id);
-		Object star = feedbackService.avgStarDocument(id);
-		md.addAttribute("star", star);
+		Object result = feedbackService.avgStarDocument(id);
+		if(result == null) {
+			md.addAttribute("star", 0);
+		}else {
+			double temp = (double) result;
+			long star = Math.round(temp);
+			md.addAttribute("star", star);
+		}
 		md.addAttribute("listFeedback", listFeedback);
 		md.addAttribute("document", document);	
 		return "document";

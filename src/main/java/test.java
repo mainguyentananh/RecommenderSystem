@@ -33,22 +33,21 @@ public class test {
 	}
 	
 	public static void main(String[] args) {
-
+		List<String> doc1 = Arrays.asList("lập", "trình", "web", "bằng", "java");
+        List<String> doc2 = Arrays.asList("lập", "trình", "oop");
+        List<String> doc3 = Arrays.asList("cơ", "sở", "dữ", "liệu", "mysql");
+        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3);
 	   
-	    
-	    String doc1 = "Lập trình web bằng java [và (spring framework, dùng spring mvc cho môn niên luận";
-	    String doc2 = "Lập trình java cho luận văn";
-	    String doc3 = "lập trình web php mysql";
-	   
-	    String[] t = doc1.split(" ");
-	    test test = new test();
-
-	    for (String string : t) {
-			System.out.println(string.replaceAll("^[-(\\[,!\\{.]|[)\\],!.\\}-]$", ""));
+        test calculator = new test();
+        
+        
+        String[] a = {"dữ","liệu"};
+        for (String string : a) {
+        	double tfidf = calculator.tfIdf(doc1, documents, string);
+            System.out.println("TF-IDF (ipsum) = " + tfidf);
+            
 		}
-	
-	
-		
-		
-	}
+        
+        
+	 	}
 }

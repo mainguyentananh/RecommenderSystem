@@ -70,7 +70,7 @@ ${notify}
       <td scope="col">${t.te_classroom.cr_category.name}</td>
 	  <td scope="col">${t.year}</td>
 	  <td scope="col">${t.semester}</td>
-	  <td scope="col"><a href="<c:url value="/teacher/teach/classroom?classroom=${t.te_classroom.id}"/>" class="text-dark text-decoration-none" target="_blank">
+	  <td scope="col"><a href="<c:url value="/teacher/teach/classroom?classroom=${t.te_classroom.id}"/>" class="text-dark text-decoration-none">
 	  	<i class="fa-solid fa-eye"></i></a>
 	  </td>  
 	  
