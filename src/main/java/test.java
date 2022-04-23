@@ -1,53 +1,28 @@
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.collections.map.HashedMap;
+
+import com.google.gson.Gson;
+
 public class test {
-	
-	
-	public double tf(List<String> doc, String term) {
-	    double result = 0;
-	    for (String word : doc) {
-	       if (term.equalsIgnoreCase(word))
-	              result++;
-	       }
-	    return result / doc.size();
-	}
 
-	
-	public double idf(List<List<String>> docs, String term) {
-	    double n = 0;
-	    for (List<String> doc : docs) {
-	        for (String word : doc) {
-	            if (term.equalsIgnoreCase(word)) {
-	                n++;
-	                break;
-	            }
-	        }
-	    }
-	    return Math.log(docs.size() / n);
-	}
-
-	public double tfIdf(List<String> doc, List<List<String>> docs, String term) {
-	    return tf(doc, term) * idf(docs, term);
-	}
-	
 	public static void main(String[] args) {
-		List<String> doc1 = Arrays.asList("lập", "trình", "web", "bằng", "java");
-        List<String> doc2 = Arrays.asList("lập", "trình", "oop");
-        List<String> doc3 = Arrays.asList("cơ", "sở", "dữ", "liệu", "mysql");
-        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3);
-	   
-        test calculator = new test();
-        
-        
-        String[] a = {"dữ","liệu"};
-        for (String string : a) {
-        	double tfidf = calculator.tfIdf(doc1, documents, string);
-            System.out.println("TF-IDF (ipsum) = " + tfidf);
-            
-		}
-        
-        
-	 	}
+	
+		HashMap<String, List<String>> t = new HashMap<String, List<String>>();
+		
+		List<String> d = new ArrayList<String>();
+		d.add("The sky is blue");
+		d.add("The sun is bright");
+		d.add("The sun in the sky is bright");
+		d.add("we can see the shining sun, the bright sun");
+		
+		t.put("document", d);
+		
+		String json = new Gson().toJson(t);
+		System.out.println(json);
+		
+	}
+	
 }
