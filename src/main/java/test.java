@@ -10,18 +10,14 @@ public class test {
 
 	public static void main(String[] args) {
 	
-		HashMap<String, List<String>> t = new HashMap<String, List<String>>();
-		
-		List<String> d = new ArrayList<String>();
-		d.add("The sky is blue");
-		d.add("The sun is bright");
-		d.add("The sun in the sky is bright");
-		d.add("we can see the shining sun, the bright sun");
-		
-		t.put("document", d);
-		
-		String json = new Gson().toJson(t);
-		System.out.println(json);
+		List<Object> t = new ArrayList<Object>();
+		if(t != null) {
+			System.out.println("tét");
+			
+		}else {
+			System.out.println(t.isEmpty());
+				
+		}
 		
 	}
 	

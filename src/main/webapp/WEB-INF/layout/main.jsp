@@ -115,6 +115,14 @@
 								<i class="fa-solid fa-rectangle-list"></i>
 							</div> <span class="nav-link-text ms-1">Category</span>
 					</a></li>
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/admin/cosinesimilarity"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-calculator"></i>
+							</div> <span class="nav-link-text ms-1">Cosine Similarity</span>
+					</a></li>
+					
+					
 				</sec:authorize>
 
 				<hr class="text-light" />

@@ -121,5 +121,9 @@
 			value="/WEB-INF/view/admin/editcategory.jsp" />
 	</definition>
 	
+	<definition name="cosinesimilarity" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/cosinesimilarity.jsp" />
+	</definition>
 	
 </tiles-definitions>

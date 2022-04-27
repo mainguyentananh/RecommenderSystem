@@ -1,5 +1,6 @@
 package demo4.service;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,18 @@ public class documentServiceImpl implements documentService{
 	public List<document> getDocumentByCategoryForHome(String idcategory) {
 		return repo.getDocumentByCategoryForHome(idcategory);
 	}
+
+	@Override
+	public HashMap<String, HashMap<Integer, String>> createJsonContainIdAndNameDocument() {
+		return repo.createJsonContainIdAndNameDocument();
+	}
+
+	@Override
+	public HashMap<String, HashMap<Integer, String>> createJsonContainIdAndSummaryDocument() {
+		return repo.createJsonContainIdAndSummaryDocument();
+	}
+
+	
 
 	
 	
