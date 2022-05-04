@@ -11,6 +11,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,7 @@ import demo4.service.documentService;
 
 @Controller
 @RequestMapping(value = "/admin")
+@PropertySource("classpath:configservice.properties")
 public class adminController {
 
 	
@@ -40,6 +43,9 @@ public class adminController {
 	
 	@Autowired
 	private cosineSimilarityService cosineSimilarityService;
+	
+	@Value("${config.heroku}")
+	private String heroku;
 	
 	@GetMapping(value = "/category")
 	public String category(Model md) {
@@ -97,11 +103,11 @@ public class adminController {
 	}
 	
 	
-	public void cosineSimilarityByDocumentName() throws Exception{
+	private void cosineSimilarityByDocumentName() throws Exception{
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndNameDocument();		
 		//Request server python
 		Gson gson = new Gson();	
-		String url="https://supportjava.herokuapp.com/cosinesimilaritybydocumentname";
+		String url=heroku+"cosinesimilaritybydocumentname";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
 		con.setDoOutput(true);
@@ -121,6 +127,7 @@ public class adminController {
 		//check cosineSimilarity
 		cosinesimilarity cosineSimilarity = cosineSimilarityService.getCosineSimilarityByKey(getValueKey);
 		
+		//update if != null else create
 		if(cosineSimilarity != null) {
 			cosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
 			cosineSimilarity.setVectorName(getValuesVectorName.toString());
@@ -139,11 +146,11 @@ public class adminController {
 	
 	
 	
-	public void cosineSimilarityByDocumentSummary() throws Exception{
+	private void cosineSimilarityByDocumentSummary() throws Exception{
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndSummaryDocument();		
 		//Request server python
 		Gson gson = new Gson();	
-		String url="https://supportjava.herokuapp.com/cosinesimilaritybydocumentsummary";
+		String url=heroku+"cosinesimilaritybydocumentsummary";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
 		con.setDoOutput(true);
@@ -158,15 +165,12 @@ public class adminController {
 		JSONArray getValuesVectorName = new JSONArray(getJson.getJSONArray("vectorName"));
 		String getValueKey = getJson.getString("key");
 
-		System.out.println(getValuesCosineSimilarity.toString());
-		System.out.println(getValuesVectorName.toString());
-		System.out.println(getValueKey);
-		
 		Calendar calendar = Calendar.getInstance();
 		
 		//check cosineSimilarity
 		cosinesimilarity cosineSimilarity = cosineSimilarityService.getCosineSimilarityByKey(getValueKey);
 		
+		//update if != null else create
 		if(cosineSimilarity != null) {
 			cosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
 			cosineSimilarity.setVectorName(getValuesVectorName.toString());
@@ -193,11 +197,27 @@ public class adminController {
 			return "cosinesimilarity";
 		}else {
 			cosineSimilarityByDocumentSummary();
-			cosineSimilarityByDocumentName();
-			
-			
+			cosineSimilarityByDocumentName();		
 			return "redirect:/admin/cosinesimilarity";		
 		}
+	}
+	
+	@GetMapping(value = "/cosinesimilarity/update")
+	public String updateCosineSimilarityByKey() throws Exception {
+			cosineSimilarityByDocumentSummary();
+			cosineSimilarityByDocumentName();
+		return "redirect:/admin/cosinesimilarity";		
+	}
+
+	@GetMapping(value = "/cosinesimilarity/detail/{key}")
+	public String detailCosineSimilarity(@PathVariable(value = "key") String key,Model md){
+		cosinesimilarity cosine = cosineSimilarityService.getCosineSimilarityByKey(key);
+		JSONObject getCosinesimilarity = new JSONObject(cosine.getCosineSimilarity());
+		JSONArray getVectorName = new JSONArray(cosine.getVectorName());
+		md.addAttribute("key", key);
+		md.addAttribute("getCosinesimilarity", getCosinesimilarity);
+		md.addAttribute("getVectorName", getVectorName.toString());
+		return "detailcosinesimilarity";		
 	}
 	
 	

@@ -18,17 +18,25 @@
       <th scope="col">Khóa</th>
       <th scope="col">Cập nhật lần gần nhất</th>
       <th scope="col">Chi tiết</th>
-      <th scope="col">Cập nhật</th> 
-    </tr>
+     </tr>
   </thead>
   <tbody>
     <c:forEach items="${listCosineSimilarity}" var="l" >
     <tr>
       <td scope="col">${l.key}</td>
       <td scope="col">${l.time}</td>
-     
-     </tr>
+      <td scope="col" ><a href="<c:url value="/admin/cosinesimilarity/detail/${l.key}"/>" class="text-dark text-decoration-none">
+      <i class="fa-solid fa-pen-to-square"></i> </a>
+      </td>
+      </tr>
    </c:forEach>
+	<tr>
+		<th colspan="2" scope="col">Cập nhật</th>
+		<td scope="col">	<a href="<c:url value="/admin/cosinesimilarity/update"/>" class="text-dark text-decoration-none">
+	      		<i class="fa-solid fa-arrows-rotate"></i> </a></td>
+     
+	</tr>    
+   
   </tbody>
 </table>
 </div>

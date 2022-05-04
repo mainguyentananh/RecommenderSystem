@@ -92,12 +92,11 @@ public class teacherController {
 
 	@Autowired
 	private ServletContext app;
-
+	
 	@GetMapping(value = "/")
 	public String home(Model md) {
 	List<category> listCategory = categoryService.getAllCategory();
 	List<List<document>> listDocument = new ArrayList<List<document>>();
-	
 	for (category category : listCategory) {
 		List<document> document = documentService.getDocumentByCategoryForHome(category.getId());
 		listDocument.add(document);

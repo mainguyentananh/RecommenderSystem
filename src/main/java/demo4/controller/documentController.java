@@ -5,13 +5,22 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,9 +34,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import demo4.model.account;
+import demo4.model.cosinesimilarity;
 import demo4.model.document;
 import demo4.model.feedback;
 import demo4.service.accountService;
+import demo4.service.cosineSimilarityService;
 import demo4.service.documentService;
 import demo4.service.feedbackService;
 
@@ -46,37 +57,159 @@ public class documentController {
 
 	@Autowired
 	private ServletContext app;
-	
+
+	@Autowired
+	private cosineSimilarityService cosineSimilarityService;
+
+
 	@GetMapping(value = "/category")
-	public String getAllDocumentByCategory(@RequestParam(value = "id") String idcategory,Model md) {
+	public String getAllDocumentByCategory(@RequestParam(value = "id") String idcategory, Model md) {
 		List<document> listdocument = documentService.getAllDocumentByCategory(idcategory);
 		md.addAttribute("listdocument", listdocument);
 		return "listdocument";
 	}
 	
-	
-	
-	@GetMapping(value = "/{id}")
-	public String getDocument(@PathVariable(value = "id") int id, Model md) {
-		document document = documentService.getDocumentById(id);
-		List<feedback> listFeedback = feedbackService.getFeedBackByIdDocument(id);
-		Object result = feedbackService.avgStarDocument(id);
-		if(result == null) {
-			md.addAttribute("star", 0);
-		}else {
-			double temp = (double) result;
-			long star = Math.round(temp);
-			md.addAttribute("star", star);
+	public HashMap<String, Double> sortByValue(HashMap<String, Double> hm) {
+		// Create a list from elements of HashMap
+		List<Map.Entry<String, Double>> list = new LinkedList<Map.Entry<String, Double>>(hm.entrySet());
+
+		// Sort the list
+		Collections.sort(list, new Comparator<Map.Entry<String, Double>>() {
+			public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+				return (o2.getValue()).compareTo(o1.getValue());
+			}
+		});
+
+		// put data from sorted list to hashmap
+		HashMap<String, Double> temp = new LinkedHashMap<String, Double>();
+		for (Map.Entry<String, Double> aa : list) {
+			temp.put(aa.getKey(), aa.getValue());
 		}
-		md.addAttribute("listFeedback", listFeedback);
-		md.addAttribute("document", document);	
-		return "document";
+		return temp;
 	}
+
+	@GetMapping(value = "/{id}")
+	public String getDocument(@PathVariable(value = "id") int id, Model md) throws Exception {
+		document document = documentService.getDocumentById(id);
+		if (document != null) {
+			List<feedback> listFeedback = feedbackService.getFeedBackByIdDocument(id);
+			Object result = feedbackService.avgStarDocument(id);
+			if (result == null) {
+				md.addAttribute("star", 0);
+			} else {
+				double temp = (double) result;
+				long star = Math.round(temp);
+				md.addAttribute("star", star);
+			}
+
+			List<cosinesimilarity> listCosineSimilarity = cosineSimilarityService.getAllCosineSimilarity();
+
+			// cosineByName
+			cosinesimilarity cosineByName = cosineSimilarityService
+					.getCosineSimilarityByKey(listCosineSimilarity.get(0).getKey());
+			
+			
+			// cosineBySummary
+			cosinesimilarity cosineBySummary = cosineSimilarityService
+					.getCosineSimilarityByKey(listCosineSimilarity.get(1).getKey());
+			
+			
+			// Convert String to Json: CosineByName And CosineBySummary
+			JSONObject getJsonCosineByName = new JSONObject(cosineByName.getCosineSimilarity());
+			JSONObject getJsonCosineBySummary = new JSONObject(cosineBySummary.getCosineSimilarity());
+			
+			
+			try {
+				JSONObject getCosineByIdOfJsonByName = getJsonCosineByName.getJSONObject(String.valueOf(id));
+				JSONObject getCosineByIdOfJsonBySummary = getJsonCosineBySummary.getJSONObject(String.valueOf(id));
+				
+				
+				// sort by value
+				HashMap<String, Double> tempResultRecommendByName = new HashMap<String, Double>();
+				HashMap<String, Double> tempResultRecommendBySummary = new HashMap<String, Double>();
+				
+				
+				Iterator<String> keys1 = getCosineByIdOfJsonByName.keys();
+				Iterator<String> keys2 = getCosineByIdOfJsonBySummary.keys();
+				
+				//sort value cosine by name
+				while (keys1.hasNext()) {
+					String key1 = keys1.next();
+					if (key1.equalsIgnoreCase(String.valueOf(id))) {
+						continue;
+					}
+					String tempValue1 = getCosineByIdOfJsonByName.get(key1).toString();
+					double covertValue1 = Double.valueOf(tempValue1);
+					tempResultRecommendByName.put(key1, covertValue1);
+
+				}
+				
+				//sort value cosine by summary
+				while (keys2.hasNext()) {
+					String key2 = keys2.next();
+					if (key2.equalsIgnoreCase(String.valueOf(id))) {
+						continue;
+					}
+					String tempValue2 = getCosineByIdOfJsonBySummary.get(key2).toString();
+					double covertValue2 = Double.valueOf(tempValue2);
+					tempResultRecommendBySummary.put(key2, covertValue2);
+
+				}
+
+				HashMap<String, Double> resultRecommendByName = sortByValue(tempResultRecommendByName);
+				String[] arrayIdDocumentCosineName = resultRecommendByName.keySet().toArray(new String[0]);
+				
+				HashMap<String, Double> resultRecommendBySummary = sortByValue(tempResultRecommendBySummary);
+				String[] arrayIdDocumentCosineSummary = resultRecommendBySummary.keySet().toArray(new String[0]);
+				
+				
+				
+				//contain 3 id document of cosine by name and 3 id document of cosine by summary
+				HashMap<Integer, Integer> tempListResult = new HashMap<Integer, Integer>();
+				
+				//add document of cosine by name
+				for (int i = 0; i < 3; i++) {
+					tempListResult.put(Integer.valueOf(arrayIdDocumentCosineName[i]), Integer.valueOf(arrayIdDocumentCosineName[i]));
+				}
+				
+				//add document of cosine by summary
+				for (int i = 0; i < arrayIdDocumentCosineSummary.length; i++) {
+					if(tempListResult.size() == 6) {
+						break;
+					}//check id summary exist in tempResult
+					else if (tempListResult.get(Integer.valueOf(arrayIdDocumentCosineSummary[i])) == null){
+						tempListResult.put(Integer.valueOf(arrayIdDocumentCosineSummary[i]), Integer.valueOf(arrayIdDocumentCosineSummary[i]));
+					}
+					
+				}
+				
+				List<document> listRecommendDocument = new ArrayList<document>();	
+				
+				for(Map.Entry<Integer, Integer> entry : tempListResult.entrySet()) {
+					listRecommendDocument.add(documentService.getDocumentById(entry.getKey()));
+				}
+				
 	
+				
+				md.addAttribute("listRecommendDocument", listRecommendDocument);
+				md.addAttribute("listFeedback", listFeedback);
+				md.addAttribute("document", document);
+
+				return "document";
+				}catch (Exception e) {
+					md.addAttribute("listFeedback", listFeedback);
+					md.addAttribute("document", document);
+					return "document";
+				}
+		}
+		return "403";
+	}
+
+
 	@PostMapping(value = "/{id}")
-	public String commentDocument(@PathVariable(value = "id") int id,@RequestParam(value = "comment") String comment) {
+	public String commentDocument(@PathVariable(value = "id") int id, @RequestParam(value = "comment") String comment) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		document document = documentService.getDocumentById(id);	
+		document document = documentService.getDocumentById(id);
 		Calendar calendar = Calendar.getInstance();
 		feedback feedback = new feedback();
 		feedback.setScore(0);
@@ -85,13 +218,13 @@ public class documentController {
 		feedback.setF_account(accountService.findAccountByUserName(auth.getName()));
 		feedback.setComment(comment);
 		feedbackService.saveFeedback(feedback);
-		return "redirect:/document/"+id;
+		return "redirect:/document/" + id;
 	}
-	
+
 	@GetMapping(value = "/{id}/star")
-	public String rateStarDocument(@PathVariable(value = "id") int id,@RequestParam(value = "score") int score) {
+	public String rateStarDocument(@PathVariable(value = "id") int id, @RequestParam(value = "score") int score) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		document document = documentService.getDocumentById(id);	
+		document document = documentService.getDocumentById(id);
 		Calendar calendar = Calendar.getInstance();
 		feedback feedback = new feedback();
 		feedback.setScore(score);
@@ -99,11 +232,8 @@ public class documentController {
 		feedback.setF_document(document);
 		feedback.setF_account(accountService.findAccountByUserName(auth.getName()));
 		feedbackService.saveFeedback(feedback);
-		return "redirect:/document/"+id;
+		return "redirect:/document/" + id;
 	}
-
-	
-	
 
 	@GetMapping(value = "/download/file/{id}")
 	public void downloadFile(HttpServletResponse response, @PathVariable(value = "id") int id) throws IOException {
@@ -164,5 +294,8 @@ public class documentController {
 		}
 
 	}
+	
+
+	
 
 }

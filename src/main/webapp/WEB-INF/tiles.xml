@@ -126,4 +126,9 @@
 			value="/WEB-INF/view/admin/cosinesimilarity.jsp" />
 	</definition>
 	
+	<definition name="detailcosinesimilarity" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/detailcosinesimilarity.jsp" />
+	</definition>
+	
 </tiles-definitions>

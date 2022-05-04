@@ -22,8 +22,8 @@
 
 <h3>${listdocument[0].d_category.name}</h3>
 <div class="row mb-3">
-	<div class="col">
 	<c:forEach items="${listdocument}" var="list">
+		<div class="col-6">
 		<div class="card mt-2">
 			<div class="row">
 				<div class="col-lg-2 col-md-4 ">
@@ -33,7 +33,7 @@
 				<div class="col-lg-10 col-md-8 ">
 					<div class="card-body">
 
-						<h5 class="card-title text-dark">${list.name}</h5>
+						<h5 class="card-title text-dark"><a href="<c:url value="/document/${list.id}"/>" class="link-primary text-decoration-none">${list.name}</a></h5>
 						<p class="card-text">
 							<strong>Sinh viên thực hiên:</strong> ${list.d_student.name}
 						</p>
@@ -41,15 +41,13 @@
 							<strong>Giảng viên hướng dẫn:</strong> ${list.d_teacher.name}
 						</p>
 						<p class="card-text">
-							<strong>Học phần:</strong> ${list.d_category.id} -
-							${list.d_category.name}
+							<strong>Học phần:</strong> ${list.d_category.id} - ${list.d_category.name}
 						</p>
-						<a href="<c:url value="/document/${list.id}"/>" class="link-primary text-decoration-none">Xem chi tiết</a>
 					</div>
-				</div>
-				
+				</div>			
 			</div>
 		</div>
+		</div>
 		</c:forEach>
-	</div>
+	
 </div>

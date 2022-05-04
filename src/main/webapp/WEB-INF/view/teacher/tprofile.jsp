@@ -16,7 +16,7 @@
 
 
 <div class="row">
-	<div class="col">
+	<div class="col ">
 			<div class="card mb-3" >
 				  <div class="row">
 				    <div class="col-4">
