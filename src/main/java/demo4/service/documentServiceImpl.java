@@ -54,6 +54,11 @@ public class documentServiceImpl implements documentService{
 		return repo.createJsonContainIdAndSummaryDocument();
 	}
 
+	@Override
+	public List<document> searchDocument(String search) {
+		return repo.searchDocument(search);
+	}
+
 	
 
 	

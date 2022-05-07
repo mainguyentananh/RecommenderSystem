@@ -14,8 +14,12 @@
 
 <div class="row">
 <h3>Vector Name</h3>
-<div class="col-6">
+<div class="col">
 ${getVectorName}
+</div>
+<h3>Độ dài:</h3>
+<div class="col">
+${count}
 </div>
 <h3>Cosine Similarity</h3>
 <div class="col">

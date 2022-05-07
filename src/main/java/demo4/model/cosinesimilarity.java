@@ -25,16 +25,24 @@ public class cosinesimilarity implements java.io.Serializable {
 	@Column(name= "cs_cosinesimilarity")
 	private String cosineSimilarity;
 
+	@Column(name = "cs_count")
+	private int countVectorName;
+	
 	public cosinesimilarity() {
 	}
 
+	
 
-	public cosinesimilarity(String key, Date time, String vectorName, String cosineSimilarity) {
+
+	public cosinesimilarity(String key, Date time, String vectorName, String cosineSimilarity, int countVectorName) {
 		this.key = key;
 		this.time = time;
 		this.vectorName = vectorName;
 		this.cosineSimilarity = cosineSimilarity;
+		this.countVectorName = countVectorName;
 	}
+
+
 
 
 	public Date getTime() {
@@ -78,6 +86,20 @@ public class cosinesimilarity implements java.io.Serializable {
 
 	public void setCosineSimilarity(String cosineSimilarity) {
 		this.cosineSimilarity = cosineSimilarity;
+	}
+
+
+
+
+	public int getCountVectorName() {
+		return countVectorName;
+	}
+
+
+
+
+	public void setCountVectorName(int countVectorName) {
+		this.countVectorName = countVectorName;
 	}
 	
 	

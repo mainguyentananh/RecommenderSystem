@@ -50,6 +50,12 @@
 			value="/WEB-INF/view/listdocument.jsp" />
 	</definition>
 	
+		<definition name="searchdocument" extends="main">
+ 	<put-attribute name="search" value="/WEB-INF/layout/search.jsp" />
+		<put-attribute name="content"
+			value="/WEB-INF/view/searchdocument.jsp" />
+	</definition>
+	
 	
  	
 	<!-- view student -->
@@ -129,6 +135,11 @@
 	<definition name="detailcosinesimilarity" extends="main">
 		<put-attribute name="content"
 			value="/WEB-INF/view/admin/detailcosinesimilarity.jsp" />
+	</definition>
+	
+	<definition name="createteacher" extends="main">
+		<put-attribute name="content"
+			value="/WEB-INF/view/admin/createteacher.jsp" />
 	</definition>
 	
 </tiles-definitions>

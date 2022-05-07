@@ -25,6 +25,17 @@ public class teacherServiceImpl implements teacherService{
 		
 	}
 
+	@Override
+	public boolean checkTeacher(String id) {
+		return repo.checkTeacher(id);
+	}
+
+	@Override
+	public void saveTeacher(teacher teacher) {
+		repo.saveTeacher(teacher);
+		
+	}
+
 	
 	
 }

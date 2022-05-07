@@ -13,4 +13,5 @@ public interface documentDao {
 	public List<document> getDocumentByCategoryForHome(String idcategory);
 	public HashMap<String, HashMap<Integer, String>> createJsonContainIdAndNameDocument();
 	public HashMap<String, HashMap<Integer, String>> createJsonContainIdAndSummaryDocument();
+	public List<document> searchDocument(String search);
 }

@@ -16,6 +16,7 @@
   <thead>
     <tr>
       <th scope="col">Khóa</th>
+      <th scope="col">Độ dài vector</th>   
       <th scope="col">Cập nhật lần gần nhất</th>
       <th scope="col">Chi tiết</th>
      </tr>
@@ -24,6 +25,7 @@
     <c:forEach items="${listCosineSimilarity}" var="l" >
     <tr>
       <td scope="col">${l.key}</td>
+      <td scope="col">${l.countVectorName}</td>
       <td scope="col">${l.time}</td>
       <td scope="col" ><a href="<c:url value="/admin/cosinesimilarity/detail/${l.key}"/>" class="text-dark text-decoration-none">
       <i class="fa-solid fa-pen-to-square"></i> </a>

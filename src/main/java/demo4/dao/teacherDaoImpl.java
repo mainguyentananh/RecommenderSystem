@@ -26,4 +26,19 @@ public class teacherDaoImpl implements teacherDao{
 		
 	}
 
+	@Override
+	public boolean checkTeacher(String id) {
+		Session session = sessionfactory.getCurrentSession();
+		if(session.get(teacher.class, id) != null) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void saveTeacher(teacher teacher) {
+		Session session = sessionfactory.getCurrentSession();
+		session.save(teacher);
+	}
+
 }

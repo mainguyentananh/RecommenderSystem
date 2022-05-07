@@ -85,6 +85,14 @@ public class documentDaoImpl implements documentDao{
 		jsonContainIdAndNameDocument.put("document", idAndSummaryDocument);
 		return jsonContainIdAndNameDocument;
 	}
+
+	@Override
+	public List<document> searchDocument(String search) {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "From document where name like :search";
+		List<document> document = session.createQuery(hql,document.class).setParameter("search", "%"+search+"%").list();
+		return document;
+	}
 	
 	
 }
