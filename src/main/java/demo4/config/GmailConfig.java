@@ -16,9 +16,9 @@ public class GmailConfig {
 	@Value("${config.username}")
 	private String username;
 	
-	@Value("${config.pass}")
-	private String pass;
-
+	@Value("${config.password}")
+	private String password;
+	
 	@Bean
 	public JavaMailSender getJavaMailSender() {
 		JavaMailSenderImpl sender = new JavaMailSenderImpl();
@@ -26,7 +26,7 @@ public class GmailConfig {
 		sender.setHost("smtp.gmail.com");
 		sender.setPort(587);
 		sender.setUsername(username);
-		sender.setPassword(pass);
+		sender.setPassword(password);
 		Properties pros = sender.getJavaMailProperties();
 		pros.setProperty("mail.transport.protocol", "smtp");
 		pros.setProperty("mail.smtp.auth", "true");

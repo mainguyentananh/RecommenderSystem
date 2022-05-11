@@ -40,7 +40,7 @@
 <div class="col-4">
 	<strong>Gợi ý</strong>
 		<c:forEach items="${listRecommend}" var="lr">
-		<div class="card mt-2">
+		<div class="card mt-2 bg-light border-secondary">
 			<div class="row">
 				<div class="col-lg-10 col-md-8 ">
 					<div class="card-body">

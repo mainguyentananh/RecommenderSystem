@@ -70,10 +70,9 @@ public class studentController {
 	@GetMapping(value = "/")
 	public String home(Model md){
 		List<category> listCategory = categoryService.getAllCategory();
-		List<List<document>> listDocument = new ArrayList<List<document>>();
-		
+		List<List<document>> listDocument = new ArrayList<List<document>>();	
 		for (category category : listCategory) {
-			List<document> document = documentService.getAllDocumentByCategory(category.getId());
+			List<document> document = documentService.getDocumentByCategoryForHome(category.getId());
 			listDocument.add(document);
 		}
 		md.addAttribute("listDocument", listDocument);
@@ -184,7 +183,7 @@ public class studentController {
 			@RequestParam(value = "teacherId") String teacherId,
 			@RequestParam(value = "classroomId") String classroomId,
 			@ModelAttribute(value = "document") document document,
-			Model md) throws IllegalStateException, IOException {
+			Model md) throws IllegalStateException, IOException, Exception {
 		
 
 		String pathFile = app.getRealPath("/static/upload/file");
@@ -220,8 +219,16 @@ public class studentController {
 		document.setD_category(categoryService.getCategoryById(categoryId));
 		document.setD_student(studentService.getStudentById(studentId));
 		document.setD_teacher(teacherService.getTeacherById(teacherId));
-		documentService.saveDocument(document);
 		
+		try {
+		documentService.saveDocument(document);
+		}catch (Exception e) {
+			try {
+				documentService.saveDocument(document);
+			} catch (Exception e2) {
+				documentService.saveDocument(document);
+			}
+		}
 		
 		documentDetail documentDetail = documentDetailService.getDocumentDetailByPrimaryKey(classroomId, studentId);
 		documentDetail.setDd_document(document);

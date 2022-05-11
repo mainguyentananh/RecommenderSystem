@@ -95,10 +95,14 @@
 <div class="row mb-3">
 	<c:forEach items="${listRecommendDocument}" var="list">
 				<div class="col-lg-2 col-md-4 col-sm-6">
+						<div class="card bg-light border-secondary mb-3">
+						<div class="card-body">
 						<h5 class=" text-dark"><a href="<c:url value="/document/${list.id}"/>" class="link-primary text-decoration-none">${list.name}</a></h5>
 							<strong>SVTH:</strong> ${list.d_student.name}<br/>
 							<strong>GVHD:</strong> ${list.d_teacher.name}<br/>
 							<strong>HP:</strong> ${list.d_category.id} - ${list.d_category.name}
+						</div>
+						</div>
 					</div>
 		</c:forEach>
 	</div>

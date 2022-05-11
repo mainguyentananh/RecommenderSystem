@@ -41,6 +41,7 @@ import demo4.service.accountService;
 import demo4.service.cosineSimilarityService;
 import demo4.service.documentService;
 import demo4.service.feedbackService;
+import demo4.service.notifyService;
 
 @Controller
 @RequestMapping(value = "/document")
@@ -59,6 +60,9 @@ public class documentController {
 	@Autowired
 	private ServletContext app;
 
+	@Autowired
+	private notifyService notifyService;
+	
 	@Autowired
 	private cosineSimilarityService cosineSimilarityService;
 
@@ -123,51 +127,104 @@ public class documentController {
 			
 			
 			try {		
-				List<JSONObject> listJO = new ArrayList<JSONObject>();
-				listJO.add(getJsonCosineByName.getJSONObject(String.valueOf(id)));
-				listJO.add(getJsonCosineBySummary.getJSONObject(String.valueOf(id)));
-				HashMap<String, Double> tempResult = new HashMap<String, Double>();
-				for (JSONObject jsonObject : listJO) {
-					Iterator<String> keys = jsonObject.keys();
-					while (keys.hasNext()) {
-						String key = keys.next();
-						String tempValue = jsonObject.get(key).toString();
-						double convertValue = Double.valueOf(tempValue);
-						if(tempResult.containsKey(key)) {
-							if(tempResult.get(key) < convertValue) {
-								tempResult.put(key, convertValue);
-							}
-							
-						}else {
-							tempResult.put(key, convertValue);
-						}
+				JSONObject getCosineByIdOfJsonByName = getJsonCosineByName.getJSONObject(String.valueOf(id));
+				JSONObject getCosineByIdOfJsonBySummary = getJsonCosineBySummary.getJSONObject(String.valueOf(id));
+				
+				
+				// sort by value
+				HashMap<String, Double> tempResultRecommendByName = new HashMap<String, Double>();
+				HashMap<String, Double> tempResultRecommendBySummary = new HashMap<String, Double>();
+				
+				
+				Iterator<String> keys1 = getCosineByIdOfJsonByName.keys();
+				Iterator<String> keys2 = getCosineByIdOfJsonBySummary.keys();
+				
+				//sort value cosine by name
+				while (keys1.hasNext()) {
+					String key1 = keys1.next();
+					if (key1.equalsIgnoreCase(String.valueOf(id))) {
+						continue;
 					}
+					String tempValue1 = getCosineByIdOfJsonByName.get(key1).toString();
+					double covertValue1 = Double.valueOf(tempValue1);
+					tempResultRecommendByName.put(key1, covertValue1);
+
 				}
 				
-				//remove current id document
-				tempResult.remove(String.valueOf((id)));
-		
-				HashMap<String, Double> resultRecommend = sortByValue(tempResult);
-				String[] arrayIdDocument = resultRecommend.keySet().toArray(new String[0]);
+				//sort value cosine by summary
+				while (keys2.hasNext()) {
+					String key2 = keys2.next();
+					if (key2.equalsIgnoreCase(String.valueOf(id))) {
+						continue;
+					}
+					String tempValue2 = getCosineByIdOfJsonBySummary.get(key2).toString();
+					double covertValue2 = Double.valueOf(tempValue2);
+					tempResultRecommendBySummary.put(key2, covertValue2);
+
+				}
+
+				HashMap<String, Double> resultRecommendByName = sortByValue(tempResultRecommendByName);
+				String[] arrayIdDocumentCosineName = resultRecommendByName.keySet().toArray(new String[0]);
+				
+				HashMap<String, Double> resultRecommendBySummary = sortByValue(tempResultRecommendBySummary);
+				String[] arrayIdDocumentCosineSummary = resultRecommendBySummary.keySet().toArray(new String[0]);
 				
 				
+				
+				//contain 3 id document of cosine by name and 3 id document of cosine by summary
+				HashMap<Integer, Integer> tempListResult = new HashMap<Integer, Integer>();
+				
+				//add document of cosine by name
+				for (int i = 0; i < 3; i++) {
+					tempListResult.put(Integer.valueOf(arrayIdDocumentCosineName[i]), Integer.valueOf(arrayIdDocumentCosineName[i]));
+				}
+				
+				//add document of cosine by summary
+				for (int i = 0; i < arrayIdDocumentCosineSummary.length; i++) {
+					if(tempListResult.size() == 6) {
+						break;
+					}//check id summary exist in tempResult
+					else if (!tempListResult.containsKey(Integer.valueOf(arrayIdDocumentCosineSummary[i]))){
+						tempListResult.put(Integer.valueOf(arrayIdDocumentCosineSummary[i]), Integer.valueOf(arrayIdDocumentCosineSummary[i]));
+					}
+					
+				}
 				
 				List<document> listRecommendDocument = new ArrayList<document>();	
 				
-				for (int i = 0; i < arrayIdDocument.length; i++) {
-					if(i < 6) {
-					listRecommendDocument.add(documentService.getDocumentById(Integer.valueOf(arrayIdDocument[i])));
-					}else {
-						break;
-					}
-				}			
+				for(Map.Entry<Integer, Integer> entry : tempListResult.entrySet()) {
+					listRecommendDocument.add(documentService.getDocumentById(entry.getKey()));
+				}
+				
+
 							
 				md.addAttribute("listRecommendDocument", listRecommendDocument);
 				md.addAttribute("listFeedback", listFeedback);
 				md.addAttribute("document", document);
 
 				return "document";
-				}catch (Exception e) {
+				}catch (Exception e) {	
+					 demo4.model.notify no = notifyService.getNotifyById("notify");
+					 String message = no.getMessage();
+					 if(message == null) {
+						 no.setMessage(String.valueOf(id));
+						 notifyService.updateNotify(no);
+					 }else {
+						 String[] arr_message = message.split("-");
+						 boolean check = true;
+						 for (String string : arr_message) {
+							if(string.equalsIgnoreCase(String.valueOf(id))) {
+								check = false;
+							}
+						}
+						 if(check) {
+							 String newMessage = String.join("-", no.getMessage(),String.valueOf(id));
+							 no.setMessage(newMessage);
+							 notifyService.updateNotify(no);
+						 }
+						 
+					 }
+					
 					md.addAttribute("listFeedback", listFeedback);
 					md.addAttribute("document", document);
 					return "document";
@@ -175,12 +232,17 @@ public class documentController {
 		}
 		return "403";
 	}
+	
+	
 
 	
 	@GetMapping(value = "/search")
 	public String searchDocument(@RequestParam(value = "search") String search,Model md) {
-		List<document> list = documentService.searchDocument(search.trim());
-		if(list != null) {
+		List<document> listSearch = documentService.searchDocument(search.trim());
+		
+		if(listSearch != null) {
+		List<document> tempListSearch = new ArrayList<document>();
+		tempListSearch.addAll(listSearch);
 		List<cosinesimilarity> listCosineSimilarity = cosineSimilarityService.getAllCosineSimilarity();
 
 		// cosineByName
@@ -192,14 +254,46 @@ public class documentController {
 		JSONObject getJsonCosineByName = new JSONObject(cosineByName.getCosineSimilarity());
 		JSONObject getJsonCosineBySummary = new JSONObject(cosineBySummary.getCosineSimilarity());
 		
-		
-		List<JSONObject> listJO = new ArrayList<JSONObject>();
-		for (int i = 0; i < list.size(); i++) {
-			if(i <= 1){
-				listJO.add(getJsonCosineBySummary.getJSONObject(String.valueOf(list.get(i).getId())));
+
+		//handle try catch when id cosine not exist and remove document in list
+		for (int i = 0; i < tempListSearch.size(); i++) {
+			try {
+			getJsonCosineByName.getJSONObject(String.valueOf(tempListSearch.get(i).getId()));
 			}
+			 catch (Exception e) {
+				 demo4.model.notify no = notifyService.getNotifyById("notify");
+				 String message = no.getMessage();
+				 if(message == null) {
+					 no.setMessage(String.valueOf(tempListSearch.get(i).getId()));
+					 notifyService.updateNotify(no);
+				 }else {
+					 String[] arr_message = message.split("-");
+					 boolean check = true;
+					 for (String string : arr_message) {
+						if(string.equalsIgnoreCase(String.valueOf(tempListSearch.get(i).getId()))) {
+							check = false;
+						}
+					}
+					 if(check) {
+						 String newMessage = String.join("-", no.getMessage(),String.valueOf(tempListSearch.get(i).getId()));
+						 no.setMessage(newMessage);
+						 notifyService.updateNotify(no);
+					 }
+					 
+				 }
+				 
+				 
+				 tempListSearch.remove(tempListSearch.get(i));
+			}
+			
+		}
+		
+		if(!tempListSearch.isEmpty()) {
+
+		List<JSONObject> listJO = new ArrayList<JSONObject>();
+		for (int i = 0; i < tempListSearch.size(); i++) {
 			if(i <= 4) {
-				listJO.add(getJsonCosineByName.getJSONObject(String.valueOf(list.get(i).getId())));
+				listJO.add(getJsonCosineByName.getJSONObject(String.valueOf(tempListSearch.get(i).getId())));
 			}			
 		}
 		
@@ -224,20 +318,50 @@ public class documentController {
 			}
 		}
 		
-		for (document l : list) {
+		for (document l : tempListSearch) {
 			tempResult.remove(String.valueOf((l.getId())));
 		}
 		
-		HashMap<String, Double> resultRecommend = sortByValue(tempResult);
+		HashMap<String, Double> resultRecommendByName = sortByValue(tempResult);
 		
 		List<document> listRecommendDocument = new ArrayList<document>();	
+		int i = 0;
+		for(Map.Entry<String, Double> entry : resultRecommendByName.entrySet()) {
+			if(i == 5) {
+				break;
+			}else {
+				listRecommendDocument.add(documentService.getDocumentById(Integer.valueOf(entry.getKey())));
+				++i;				
+			}
+			}
+	 
+		//add id document in cosine summary
+		JSONObject getCosineByIdOfJsonBySummary = getJsonCosineBySummary.getJSONObject(String.valueOf(tempListSearch.get(0).getId()));
 		
-		for(Map.Entry<String, Double> entry : resultRecommend.entrySet()) {
-			listRecommendDocument.add(documentService.getDocumentById(Integer.valueOf(entry.getKey())));
+		HashMap<String, Double> tempResultRecommendBySummary = new HashMap<String, Double>();
+		
+	
+		Iterator<String> keys2 = getCosineByIdOfJsonBySummary.keys();
+		
+		//sort value cosine by summary
+		while (keys2.hasNext()) {
+			String key2 = keys2.next();
+			if (key2.equalsIgnoreCase(String.valueOf(tempListSearch.get(0).getId()))) {
+				continue;
+			}
+			String tempValue2 = getCosineByIdOfJsonBySummary.get(key2).toString();
+			double covertValue2 = Double.valueOf(tempValue2);
+			tempResultRecommendBySummary.put(key2, covertValue2);
+
 		}
 		
-		md.addAttribute("list", list);
+		HashMap<String, Double> resultRecommendBySummary = sortByValue(tempResultRecommendBySummary);	
 		md.addAttribute("listRecommend", listRecommendDocument);
+		
+		}
+		md.addAttribute("list", listSearch);
+		
+		
 		}
 		return "searchdocument";
 	}

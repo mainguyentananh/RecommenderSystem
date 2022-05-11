@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,14 +43,18 @@ import demo4.model.account;
 import demo4.model.account_role;
 import demo4.model.category;
 import demo4.model.cosinesimilarity;
+import demo4.model.document;
 import demo4.model.teacher;
+import demo4.model.tempcosinesimilarity;
 import demo4.service.accountService;
 import demo4.service.account_roleService;
 import demo4.service.categoryService;
 import demo4.service.cosineSimilarityService;
 import demo4.service.documentService;
+import demo4.service.notifyService;
 import demo4.service.roleService;
 import demo4.service.teacherService;
+import demo4.service.tempCosineSimilarityService;
 
 @Controller
 @RequestMapping(value = "/admin")
@@ -65,6 +70,9 @@ public class adminController {
 	
 	@Autowired
 	private cosineSimilarityService cosineSimilarityService;
+	
+	@Autowired
+	private tempCosineSimilarityService tempCosineSimilarityService;
 	
 	@Value("${config.heroku}")
 	private String heroku;
@@ -83,6 +91,9 @@ public class adminController {
 	
 	@Autowired
 	private roleService roleService;
+	
+	@Autowired
+	private notifyService notifyService;
 	
 	@GetMapping(value = "/category")
 	public String category(Model md) {
@@ -140,7 +151,7 @@ public class adminController {
 	}
 	
 	
-	private void cosineSimilarityByDocumentName() throws Exception{
+	private void tempCosineSimilarityByDocumentName() throws Exception{
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndNameDocument();		
 		//Request server python
 		Gson gson = new Gson();	
@@ -162,30 +173,31 @@ public class adminController {
 		Calendar calendar = Calendar.getInstance();
 		
 		//check cosineSimilarity
-		cosinesimilarity cosineSimilarity = cosineSimilarityService.getCosineSimilarityByKey(getValueKey);
+		//check cosineSimilarity
+		tempcosinesimilarity tempCosineSimilarity = tempCosineSimilarityService.getTempCosineSimilarityByKey(getValueKey);
 		
 		//update if != null else create
-		if(cosineSimilarity != null) {
-			cosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
-			cosineSimilarity.setVectorName(getValuesVectorName.toString());
-			cosineSimilarity.setTime(calendar.getTime());
-			cosineSimilarity.setCountVectorName(countVectorName);
-			cosineSimilarityService.updateCosineSimilarity(cosineSimilarity);
+		if(tempCosineSimilarity != null) {
+			tempCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
+			tempCosineSimilarity.setVectorName(getValuesVectorName.toString());
+			tempCosineSimilarity.setTime(calendar.getTime());
+			tempCosineSimilarity.setCountVectorName(countVectorName);
+			tempCosineSimilarityService.updateTempCosineSimilarity(tempCosineSimilarity);
 		}else {
-			cosinesimilarity newCosineSimilarity = new cosinesimilarity();
-			newCosineSimilarity.setKey(getValueKey);
-			newCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
-			newCosineSimilarity.setVectorName(getValuesVectorName.toString());
-			newCosineSimilarity.setTime(calendar.getTime());
-			newCosineSimilarity.setCountVectorName(countVectorName);
-			cosineSimilarityService.saveCosineSimilarity(newCosineSimilarity);
+			tempcosinesimilarity newTempCosineSimilarity = new tempcosinesimilarity();
+			newTempCosineSimilarity.setKey(getValueKey);
+			newTempCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
+			newTempCosineSimilarity.setVectorName(getValuesVectorName.toString());
+			newTempCosineSimilarity.setTime(calendar.getTime());
+			newTempCosineSimilarity.setCountVectorName(countVectorName);
+			tempCosineSimilarityService.saveTempCosineSimilarity(newTempCosineSimilarity);
 		}
 			
 	}
 	
 	
 	
-	private void cosineSimilarityByDocumentSummary() throws Exception{
+	private void tempCosineSimilarityByDocumentSummary() throws Exception{
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndSummaryDocument();		
 		//Request server python
 		Gson gson = new Gson();	
@@ -204,27 +216,26 @@ public class adminController {
 		JSONArray getValuesVectorName = new JSONArray(getJson.getJSONArray("vectorName"));
 		String getValueKey = getJson.getString("key");
 		int countVectorName = (int) getJson.get("countVectorName");
-
 		Calendar calendar = Calendar.getInstance();
 		
 		//check cosineSimilarity
-		cosinesimilarity cosineSimilarity = cosineSimilarityService.getCosineSimilarityByKey(getValueKey);
+		tempcosinesimilarity tempCosineSimilarity = tempCosineSimilarityService.getTempCosineSimilarityByKey(getValueKey);
 		
 		//update if != null else create
-		if(cosineSimilarity != null) {
-			cosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
-			cosineSimilarity.setVectorName(getValuesVectorName.toString());
-			cosineSimilarity.setTime(calendar.getTime());
-			cosineSimilarity.setCountVectorName(countVectorName);
-			cosineSimilarityService.updateCosineSimilarity(cosineSimilarity);
+		if(tempCosineSimilarity != null) {
+			tempCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
+			tempCosineSimilarity.setVectorName(getValuesVectorName.toString());
+			tempCosineSimilarity.setTime(calendar.getTime());
+			tempCosineSimilarity.setCountVectorName(countVectorName);
+			tempCosineSimilarityService.updateTempCosineSimilarity(tempCosineSimilarity);
 		}else {
-			cosinesimilarity newCosineSimilarity = new cosinesimilarity();
-			newCosineSimilarity.setKey(getValueKey);
-			newCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
-			newCosineSimilarity.setVectorName(getValuesVectorName.toString());
-			newCosineSimilarity.setTime(calendar.getTime());
-			newCosineSimilarity.setCountVectorName(countVectorName);
-			cosineSimilarityService.saveCosineSimilarity(newCosineSimilarity);
+			tempcosinesimilarity newTempCosineSimilarity = new tempcosinesimilarity();
+			newTempCosineSimilarity.setKey(getValueKey);
+			newTempCosineSimilarity.setCosineSimilarity(getValuesCosineSimilarity.toString());
+			newTempCosineSimilarity.setVectorName(getValuesVectorName.toString());
+			newTempCosineSimilarity.setTime(calendar.getTime());
+			newTempCosineSimilarity.setCountVectorName(countVectorName);
+			tempCosineSimilarityService.saveTempCosineSimilarity(newTempCosineSimilarity);
 		}
 			
 	}
@@ -232,25 +243,66 @@ public class adminController {
 	
 	@GetMapping(value = "/cosinesimilarity")
 	public String cosineSimilarity(Model md) throws Exception {
-		List<cosinesimilarity> listCosineSimilarity = cosineSimilarityService.getAllCosineSimilarity();
+		List<tempcosinesimilarity> listTempCosineSimilarity = tempCosineSimilarityService.getAllTempCosineSimilarity();
 		
-		if(!listCosineSimilarity.isEmpty()) {
+		if(!listTempCosineSimilarity.isEmpty()) {
+			List<cosinesimilarity> listCosineSimilarity = cosineSimilarityService.getAllCosineSimilarity();
+			if(listCosineSimilarity.isEmpty()) {
+				for (tempcosinesimilarity cosinesimilarity2 : listTempCosineSimilarity) {
+					Calendar calendar = Calendar.getInstance();
+					cosinesimilarity ncs = new cosinesimilarity(cosinesimilarity2.getKey(),calendar.getTime(),cosinesimilarity2.getVectorName(),cosinesimilarity2.getCosineSimilarity(),cosinesimilarity2.getCountVectorName());
+					cosineSimilarityService.saveCosineSimilarity(ncs);
+				}
+			}
+			List<document> listDocumentInNotify = new ArrayList<document>();
+			demo4.model.notify notify = notifyService.getNotifyById("notify");
+			if(notify.getMessage() != null) {
+				String[] arrayIdDocumentToNotify = notify.getMessage().split("-");
+				for (String id : arrayIdDocumentToNotify) {
+					listDocumentInNotify.add(documentService.getDocumentById(Integer.valueOf(id)));
+				}
+			}
+			md.addAttribute("listDocumentInNotify", listDocumentInNotify);
 			md.addAttribute("listCosineSimilarity", listCosineSimilarity);
+			md.addAttribute("listTempCosineSimilarity", listTempCosineSimilarity);
 			return "cosinesimilarity";
 		}else {
-			cosineSimilarityByDocumentSummary();
-			cosineSimilarityByDocumentName();		
+			demo4.model.notify createNotify = new demo4.model.notify();
+			createNotify.setId("notify");
+			notifyService.saveNotify(createNotify);
+			tempCosineSimilarityByDocumentName();		
+			tempCosineSimilarityByDocumentSummary();
 			return "redirect:/admin/cosinesimilarity";		
 		}
 	}
 	
 	@GetMapping(value = "/cosinesimilarity/update")
-	public String updateCosineSimilarityByKey() throws Exception {
-			cosineSimilarityByDocumentSummary();
-			cosineSimilarityByDocumentName();
+	public String tempCosineSimilarityByKey() throws Exception {
+		List<tempcosinesimilarity> listTempCosineSimilarity = tempCosineSimilarityService.getAllTempCosineSimilarity();
+		Calendar calendar = Calendar.getInstance();
+		for (tempcosinesimilarity tempcosinesimilarity : listTempCosineSimilarity) {
+			cosinesimilarity updateCosine = cosineSimilarityService.getCosineSimilarityByKey(tempcosinesimilarity.getKey());
+			updateCosine.setCosineSimilarity(tempcosinesimilarity.getCosineSimilarity());
+			updateCosine.setCountVectorName(tempcosinesimilarity.getCountVectorName());
+			updateCosine.setVectorName(tempcosinesimilarity.getVectorName());
+			updateCosine.setTime(calendar.getTime());
+			cosineSimilarityService.updateCosineSimilarity(updateCosine);
+		}
 		return "redirect:/admin/cosinesimilarity";		
 	}
 
+	
+	@GetMapping(value = "/tempcosinesimilarity/create")
+	public String tempCosineSimilarity() throws Exception {
+		tempCosineSimilarityByDocumentSummary();
+		tempCosineSimilarityByDocumentName();
+		demo4.model.notify no = notifyService.getNotifyById("notify");
+		no.setMessage(null);
+		notifyService.updateNotify(no);
+		return "redirect:/admin/cosinesimilarity";
+	}
+	
+	
 	@GetMapping(value = "/cosinesimilarity/detail/{key}")
 	public String detailCosineSimilarity(@PathVariable(value = "key") String key,Model md){
 		cosinesimilarity cosine = cosineSimilarityService.getCosineSimilarityByKey(key);
@@ -258,6 +310,19 @@ public class adminController {
 		JSONArray getVectorName = new JSONArray(cosine.getVectorName());
 		md.addAttribute("key", key);
 		md.addAttribute("count", cosine.getCountVectorName());
+		md.addAttribute("getCosinesimilarity", getCosinesimilarity);
+		md.addAttribute("getVectorName", getVectorName.toString());
+		return "detailcosinesimilarity";		
+	}
+	
+	
+	@GetMapping(value = "/tempcosinesimilarity/detail/{key}")
+	public String detailTempCosineSimilarity(@PathVariable(value = "key") String key,Model md){
+		tempcosinesimilarity tempcosine = tempCosineSimilarityService.getTempCosineSimilarityByKey(key);
+		JSONObject getCosinesimilarity = new JSONObject(tempcosine.getCosineSimilarity());
+		JSONArray getVectorName = new JSONArray(tempcosine.getVectorName());
+		md.addAttribute("key", key);
+		md.addAttribute("count", tempcosine.getCountVectorName());
 		md.addAttribute("getCosinesimilarity", getCosinesimilarity);
 		md.addAttribute("getVectorName", getVectorName.toString());
 		return "detailcosinesimilarity";		

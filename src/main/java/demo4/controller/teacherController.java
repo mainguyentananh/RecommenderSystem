@@ -83,9 +83,10 @@ public class teacherController {
 
 	@Autowired
 	private documentDetailService documentDetailService;
-
+	
 	@Autowired
 	private mailService mailService;
+
 	
 	@Autowired
 	private documentService documentService;
@@ -329,7 +330,7 @@ public class teacherController {
 					String subject = "Computer Science - Can Tho University";
 					String content = "Dear " + readStudentId + ". Login information to the system with username: "
 							+ readStudentId + "and password: " + passwordAccount;
-					 mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
+					mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
 
 				}
 
