@@ -11,7 +11,7 @@
 </div>
 
 
-<h3>Cosine Similarity</h3>
+<h3>Danh sách gợi ý</h3>
 <div class="table-responsive">
 <table class="table table-primary table-bordered border-dark text-center">
   <thead>
@@ -34,7 +34,7 @@
       </tr>
    </c:forEach>
 	<tr>
-		<th colspan="2" scope="col">Cập nhật</th>
+		<th colspan="2" scope="col">Cập nhật (Từ danh sách gợi ý tạm)</th>
 		<th scope="col">	<a href="<c:url value="/admin/cosinesimilarity/update"/>" class="text-dark text-decoration-none">
 	      		<i class="fa-solid fa-arrows-rotate"></i> </a></th>
      	<th></th>
@@ -45,7 +45,7 @@
 </div>
 
 
-<h3>Bảng tính trước cosine cho hệ thống</h3>
+<h3>Danh sách gợi ý (tạm) dùng để tính lại các thông số</h3>
 <div class="table-responsive">
 <table class="table table-primary table-bordered border-dark text-center">
   <thead>

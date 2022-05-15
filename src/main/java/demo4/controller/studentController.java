@@ -31,6 +31,7 @@ import demo4.service.accountService;
 import demo4.service.categoryService;
 import demo4.service.documentDetailService;
 import demo4.service.documentService;
+import demo4.service.notifyService;
 import demo4.service.studentService;
 import demo4.service.teachService;
 import demo4.service.teacherService;
@@ -61,6 +62,8 @@ public class studentController {
 	@Autowired
 	private categoryService categoryService;
 	
+	@Autowired
+	private notifyService notifyService;
 	
 	@Autowired
 	private ServletContext app;
@@ -229,6 +232,23 @@ public class studentController {
 				documentService.saveDocument(document);
 			}
 		}
+		
+	
+		
+		//add new document into notify
+		demo4.model.notify no = notifyService.getNotifyById("notify");
+		 String message = no.getMessage();
+		 if(message == null) {
+			 no.setMessage(String.valueOf(document.getId()));
+			 notifyService.updateNotify(no);
+		 }else {
+				 String newMessage = String.join("-", no.getMessage(),String.valueOf(document.getId()));
+				 no.setMessage(newMessage);
+				 notifyService.updateNotify(no);
+		}
+		
+		
+		
 		
 		documentDetail documentDetail = documentDetailService.getDocumentDetailByPrimaryKey(classroomId, studentId);
 		documentDetail.setDd_document(document);
