@@ -8,4 +8,6 @@ public interface feedbackService {
 	public void saveFeedback(feedback feedback);
 	public List<feedback> getFeedBackByIdDocument(int id);
 	public Object avgStarDocument(int id);
+	public List<Object[]> feedbackDocumentOfAccount();
+	public List<Object> listAccountFeedback();
 }

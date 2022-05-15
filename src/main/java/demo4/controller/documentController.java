@@ -140,7 +140,7 @@ public class documentController {
 			JSONObject getCosineByIdOfJsonByName = getJsonCosineByName.getJSONObject(String.valueOf(id));
 			JSONObject getCosineByIdOfJsonBySummary = getJsonCosineBySummary.getJSONObject(String.valueOf(id));
 
-			// sort by value
+			
 			HashMap<String, Double> tempResultRecommendByName = new HashMap<String, Double>();
 			HashMap<String, Double> tempResultRecommendBySummary = new HashMap<String, Double>();
 

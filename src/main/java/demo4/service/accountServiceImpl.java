@@ -36,6 +36,11 @@ public class accountServiceImpl implements accountService{
 		return repo.findAccountByUserName(username);
 	}
 
+	@Override
+	public Object countAccount() {
+		return repo.countAccount();
+	}
+
 	
 	
 }

@@ -8,9 +8,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
@@ -51,6 +56,7 @@ import demo4.service.account_roleService;
 import demo4.service.categoryService;
 import demo4.service.cosineSimilarityService;
 import demo4.service.documentService;
+import demo4.service.feedbackService;
 import demo4.service.notifyService;
 import demo4.service.roleService;
 import demo4.service.teacherService;
@@ -94,6 +100,9 @@ public class adminController {
 	
 	@Autowired
 	private notifyService notifyService;
+	
+	@Autowired
+	private feedbackService feedbackService;
 	
 	@GetMapping(value = "/category")
 	public String category(Model md) {
@@ -333,6 +342,232 @@ public class adminController {
 	public String createAccountTeacher() {
 		return "createteacher";
 	}
+	
+	
+	
+	public  HashMap<String, Double> sortByValue(HashMap<String, Double> hm) {
+		// Create a list from elements of HashMap
+		List<Map.Entry<String, Double>> list = new LinkedList<Map.Entry<String, Double>>(hm.entrySet());
+
+		// Sort the list
+		Collections.sort(list, new Comparator<Map.Entry<String, Double>>() {
+			public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+				return (o2.getValue()).compareTo(o1.getValue());
+			}
+		});
+
+		// put data from sorted list to hashmap
+		HashMap<String, Double> temp = new LinkedHashMap<String, Double>();
+		for (Map.Entry<String, Double> aa : list) {
+			temp.put(aa.getKey(), aa.getValue());
+		}
+		
+		list.clear();
+		return temp;
+	}
+	
+	
+	
+	@GetMapping(value = "/evaluatingsystem")
+	public String evalutingForSystem(Model md) {
+		Object objCountAccountInSystem = accountService.countAccount();
+		List<Object[]> feedbackDocumentOfAccount = feedbackService.feedbackDocumentOfAccount();
+		
+		//remove id exist in notify (clean list)
+		demo4.model.notify no = notifyService.getNotifyById("notify");
+		String message = no.getMessage();
+		if (message != null) {
+			String[] arr_message = message.split("-");
+			for (String idInNotify : arr_message) {
+				for (int i = 0; i < feedbackDocumentOfAccount.size(); i++) {
+					Object[] obj = feedbackDocumentOfAccount.get(i);
+					String convertResultObj = String.valueOf(obj[1]) ;
+					if(convertResultObj.equalsIgnoreCase(idInNotify)) {
+						feedbackDocumentOfAccount.remove(i);
+					}
+				}
+
+			}
+		}
+		
+		//Hashmap with key is id account and values is string document id feedback of account
+		HashMap<String, String> resultFb = new HashMap<String, String>();
+		
+		
+		//put to result with key is Id account and values is String (id document)
+		for (Object[] objects : feedbackDocumentOfAccount) {
+			if(resultFb.containsKey(String.valueOf(objects[0]))) {
+				String oldValues = resultFb.get(String.valueOf(objects[0]));
+				resultFb.replace(String.valueOf(objects[0]), oldValues, String.join("-", oldValues,String.valueOf(objects[1])));
+				
+			}else {
+				resultFb.put(String.valueOf(objects[0]),String.valueOf(objects[1]));
+			}
+		}
+		
+		
+		List<String> logs = new ArrayList<String>();
+		
+		double countAccountInSystem = Double.valueOf(String.valueOf(objCountAccountInSystem));
+		int countEvaluationForAccount = 0;
+		int countEvaluationForItem = 0;
+		
+		
+		for (Map.Entry<String, String> entry : resultFb.entrySet()) {
+			
+			
+			String[] arrayDocumentOfAccount = entry.getValue().split("-");
+			
+			//cosinesimilarity of first document in arrayDocumentOfAccount
+			String firstDocumentId = arrayDocumentOfAccount[0];
+			
+			
+			//Begin result 6 recommend document with 3 document cosine similarity by name, and 3 document cosine similarity by summary
+			List<cosinesimilarity> listCosineSimilarity = cosineSimilarityService.getAllCosineSimilarity();
+			// cosineByName
+			cosinesimilarity cosineByName = cosineSimilarityService
+					.getCosineSimilarityByKey(listCosineSimilarity.get(0).getKey());
+			cosinesimilarity cosineBySummary = cosineSimilarityService
+					.getCosineSimilarityByKey(listCosineSimilarity.get(1).getKey());
+
+			JSONObject getJsonCosineByName = new JSONObject(cosineByName.getCosineSimilarity());
+			JSONObject getJsonCosineBySummary = new JSONObject(cosineBySummary.getCosineSimilarity());
+			
+			JSONObject getCosineByIdOfJsonByName = getJsonCosineByName.getJSONObject(firstDocumentId);
+			JSONObject getCosineByIdOfJsonBySummary = getJsonCosineBySummary.getJSONObject(firstDocumentId);
+
+			
+			HashMap<String, Double> tempResultRecommendByName = new HashMap<String, Double>();
+			HashMap<String, Double> tempResultRecommendBySummary = new HashMap<String, Double>();
+
+			Iterator<String> keys1 = getCosineByIdOfJsonByName.keys();
+			Iterator<String> keys2 = getCosineByIdOfJsonBySummary.keys();
+
+			// sort value cosine by name
+			while (keys1.hasNext()) {
+				String key1 = keys1.next();
+				if (key1.equalsIgnoreCase(firstDocumentId)) {
+					continue;
+				}
+				String tempValue1 = getCosineByIdOfJsonByName.get(key1).toString();
+				double covertValue1 = Double.valueOf(tempValue1);
+				tempResultRecommendByName.put(key1, covertValue1);
+
+			}
+
+			// sort value cosine by summary
+			while (keys2.hasNext()) {
+				String key2 = keys2.next();
+				if (key2.equalsIgnoreCase(firstDocumentId)) {
+					continue;
+				}
+				String tempValue2 = getCosineByIdOfJsonBySummary.get(key2).toString();
+				double covertValue2 = Double.valueOf(tempValue2);
+				tempResultRecommendBySummary.put(key2, covertValue2);
+
+			}
+
+			HashMap<String, Double> resultRecommendByName = sortByValue(tempResultRecommendByName);
+			String[] arrayIdDocumentCosineName = resultRecommendByName.keySet().toArray(new String[0]);
+
+			HashMap<String, Double> resultRecommendBySummary = sortByValue(tempResultRecommendBySummary);
+			String[] arrayIdDocumentCosineSummary = resultRecommendBySummary.keySet().toArray(new String[0]);
+
+			// contain 3 id document of cosine by name and 3 id document of cosine by
+			// summary
+			HashMap<Integer, Integer> tempListResult = new HashMap<Integer, Integer>();
+
+			// add document of cosine by name
+			for (int i = 0; i < 3; i++) {
+				tempListResult.put(Integer.valueOf(arrayIdDocumentCosineName[i]),
+						Integer.valueOf(arrayIdDocumentCosineName[i]));
+			}
+
+			// add document of cosine by summary
+			for (int i = 0; i < arrayIdDocumentCosineSummary.length; i++) {
+				if (tempListResult.size() == 6) {
+					break;
+				} // check id summary exist in tempResult
+				else if (!tempListResult.containsKey(Integer.valueOf(arrayIdDocumentCosineSummary[i]))) {
+					tempListResult.put(Integer.valueOf(arrayIdDocumentCosineSummary[i]),
+							Integer.valueOf(arrayIdDocumentCosineSummary[i]));
+				}
+
+			}
+			
+			//end result recommend
+			
+			
+			// 6 tai lieu, 3 goi y theo ten , 3 goi y theo tom tat
+			List<String> listContainDocumentRecommendForFirstDocumentId = new ArrayList<String>();
+			
+			for (Map.Entry<Integer, Integer> keyOftempListResult : tempListResult.entrySet()) {
+				listContainDocumentRecommendForFirstDocumentId.add(String.valueOf(keyOftempListResult.getKey()));
+			}
+			
+			
+			String stringTempLogs ="";
+			for (String string : listContainDocumentRecommendForFirstDocumentId) {
+				stringTempLogs = String.join("-",stringTempLogs,string);
+			}
+			
+			
+			
+			for (String documentIdFeedbackOfAccount : arrayDocumentOfAccount) {
+				
+				int countTemp = 0;
+				
+				for (String documentIdOfRecommend : listContainDocumentRecommendForFirstDocumentId) {
+					if(documentIdOfRecommend.equalsIgnoreCase(documentIdFeedbackOfAccount)) {
+						countEvaluationForItem++;
+						countTemp++;
+					}
+					
+				}
+				
+				if(countTemp > 0) {
+					countEvaluationForAccount++;
+					countTemp=0;
+				}
+			}
+			
+			
+			
+		String resultLogs= "AccountId: "+entry.getKey()+ ",documentIdFeedback: "+entry.getValue()+",DocumentRecommend:"+stringTempLogs;	
+		logs.add(resultLogs);
+		}
+		
+		
+		
+		
+		
+		
+		List<Object> listAccountFeedback = feedbackService.listAccountFeedback();
+		
+		double evaluationAccount = Math.round(countEvaluationForAccount/countAccountInSystem * 100);
+		double evaluationItem = Math.round(countEvaluationForItem/countAccountInSystem * 100);
+		
+		
+		
+		md.addAttribute("logs", logs);
+		md.addAttribute("countAccountFeedback", listAccountFeedback.size());
+		md.addAttribute("evaluationAccount", evaluationAccount);
+		md.addAttribute("evaluationItem", evaluationItem);
+		md.addAttribute("countAccountInSystem", Math.round(countAccountInSystem));
+		md.addAttribute("countEvaluationForAccount", countEvaluationForAccount);
+		md.addAttribute("countEvaluationForItem", countEvaluationForItem);
+		
+		
+		return "evaluation";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	@PostMapping(value = "/createteacher", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	public String confirmCreateTeacher(@RequestParam(value = "filename") MultipartFile file, Model md)

@@ -7,5 +7,5 @@ public interface accountService {
 	public void updateAccount(account ac);
 	public void saveAccount(account ac);
 	public account findAccountByUserName(String username);
-	
+	public Object countAccount();
 }

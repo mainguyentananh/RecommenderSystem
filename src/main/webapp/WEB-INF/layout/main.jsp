@@ -129,6 +129,13 @@
 							</div> <span class="nav-link-text ms-1">Cosine Similarity</span>
 					</a></li>
 					
+					<li class="nav-item"><a class="nav-link text-white "
+						href="<c:url value="/admin/evaluatingsystem"/>">
+							<div class="text-white">
+								<i class="fa-solid fa-display"></i>
+							</div> <span class="nav-link-text ms-1">Evaluating System</span>
+					</a></li>
+					
 				</sec:authorize>
 
 				<hr class="text-light" />

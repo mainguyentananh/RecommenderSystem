@@ -38,6 +38,22 @@ public class feedbackDaoImpl implements feedbackDao{
 		return result;
 	}
 
+	@Override
+	public List<Object[]> feedbackDocumentOfAccount() {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "select f_account.id,f_document.id from feedback group by f_document.id,f_account.id order by f_account.id asc";
+		List<Object[]> l = session.createQuery(hql, Object[].class).list();
+		return l;
+	}
+
+	@Override
+	public List<Object> listAccountFeedback() {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "select f_account.id from feedback group by f_account.id";
+		List<Object> l = session.createQuery(hql, Object.class).list();
+		return l;
+	}
+
 	
 	
 }

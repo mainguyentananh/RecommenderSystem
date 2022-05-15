@@ -8,5 +8,5 @@ public interface accountDao {
 	public void updateAccount(account ac);
 	public void saveAccount(account ac);
 	public boolean checkAccountId(int id);
-
+	public Object countAccount();
 }

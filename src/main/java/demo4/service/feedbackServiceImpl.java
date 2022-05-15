@@ -31,6 +31,16 @@ public class feedbackServiceImpl implements feedbackService{
 		return repo.avgStarDocument(id);
 	}
 
+	@Override
+	public List<Object[]> feedbackDocumentOfAccount() {
+		return repo.feedbackDocumentOfAccount();
+	}
+
+	@Override
+	public List<Object> listAccountFeedback() {
+		return repo.listAccountFeedback();
+	}
+
 	
 	
 }

@@ -49,6 +49,14 @@ public class accountDaoImpl implements accountDao{
 		session.save(ac);
 	}
 
+	@Override
+	public Object countAccount() {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "select count(*) from account";
+		Object count = session.createQuery(hql,Object.class).getSingleResult();
+		return count;
+	}
+
 
 
 
