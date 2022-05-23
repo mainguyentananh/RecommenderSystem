@@ -329,7 +329,7 @@ public class teacherController {
 					// send account for student by mail
 					String subject = "Computer Science - Can Tho University";
 					String content = "Dear " + readStudentId + ". Login information to the system with username: "
-							+ readStudentId + "and password: " + passwordAccount;
+							+ readStudentId + " and password: " + passwordAccount;
 					mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
 
 				}

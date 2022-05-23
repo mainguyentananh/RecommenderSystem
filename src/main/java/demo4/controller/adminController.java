@@ -161,9 +161,9 @@ public class adminController {
 	
 	
 	private void tempCosineSimilarityByDocumentName() throws Exception{
-		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndNameDocument();		
+		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndNameDocument();
 		//Request server python
-		Gson gson = new Gson();	
+		Gson gson = new Gson();
 		String url=heroku+"cosinesimilaritybydocumentname";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
@@ -210,6 +210,7 @@ public class adminController {
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndSummaryDocument();		
 		//Request server python
 		Gson gson = new Gson();	
+		
 		String url=heroku+"cosinesimilaritybydocumentsummary";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
@@ -303,8 +304,8 @@ public class adminController {
 	
 	@GetMapping(value = "/tempcosinesimilarity/create")
 	public String tempCosineSimilarity() throws Exception {
-		tempCosineSimilarityByDocumentSummary();
 		tempCosineSimilarityByDocumentName();
+		tempCosineSimilarityByDocumentSummary();
 		demo4.model.notify no = notifyService.getNotifyById("notify");
 		no.setMessage(null);
 		notifyService.updateNotify(no);
@@ -512,25 +513,21 @@ public class adminController {
 			}
 			
 			
-			
+			int countTemp = 0;
 			for (String documentIdFeedbackOfAccount : arrayDocumentOfAccount) {
-				
-				int countTemp = 0;
-				
-				for (String documentIdOfRecommend : listContainDocumentRecommendForFirstDocumentId) {
+					for (String documentIdOfRecommend : listContainDocumentRecommendForFirstDocumentId) {
 					if(documentIdOfRecommend.equalsIgnoreCase(documentIdFeedbackOfAccount)) {
 						countEvaluationForItem++;
 						countTemp++;
 					}
 					
 				}
-				
-				if(countTemp > 0) {
-					countEvaluationForAccount++;
-					countTemp=0;
-				}
 			}
 			
+			if(countTemp > 0) {
+				countEvaluationForAccount++;
+				countTemp = 0;
+			}
 			
 			
 		String resultLogs= "AccountId: "+entry.getKey()+ ",documentIdFeedback: "+entry.getValue()+",DocumentRecommend:"+stringTempLogs;	
@@ -538,17 +535,9 @@ public class adminController {
 		}
 		
 		
-		
-		
-		
-		
 		List<Object> listAccountFeedback = feedbackService.listAccountFeedback();
-		
 		double evaluationAccount = Math.round(countEvaluationForAccount/countAccountInSystem * 100);
 		double evaluationItem = Math.round(countEvaluationForItem/countAccountInSystem * 100);
-		
-		
-		
 		md.addAttribute("logs", logs);
 		md.addAttribute("countAccountFeedback", listAccountFeedback.size());
 		md.addAttribute("evaluationAccount", evaluationAccount);

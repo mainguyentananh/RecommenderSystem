@@ -14,10 +14,10 @@
 <div class="col">
 	<strong>Số lượng người dùng trong hệ thống: </strong>${countAccountInSystem}<br/>
 	<strong>Số lượng người dùng trong hệ thống đã tương tác với tài liệu: </strong>${countAccountFeedback}<br/>
-	<strong>Chỉ số với người dùng: </strong>${countEvaluationForAccount}<br/>
-	<strong>Chỉ số với sản phẩm: </strong>${countEvaluationForItem}<br/>
-	<strong>Đánh giá hệ thống với chỉ số với người dùng: </strong>${evaluationAccount}%<br/>
-	<strong>Đánh giá hệ thống với chỉ số với sản phẩm: </strong>${evaluationItem}%<br/>
+	<strong>Độ chính xác theo người dùng: </strong>${countEvaluationForAccount}<br/>
+	<strong>Độ chính xác theo tài liệu: </strong>${countEvaluationForItem}<br/>
+	<strong>Đánh giá hệ thống Given-1(người dùng): </strong>${evaluationAccount}%<br/>
+	<strong>Đánh giá hệ thống Given-1(tài liệu): </strong>${evaluationItem}%<br/>
 </div>
 </div>
 <div class="row mt-3">
