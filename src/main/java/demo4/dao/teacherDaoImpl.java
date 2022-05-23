@@ -1,5 +1,7 @@
 package demo4.dao;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,14 @@ public class teacherDaoImpl implements teacherDao{
 	public void saveTeacher(teacher teacher) {
 		Session session = sessionfactory.getCurrentSession();
 		session.save(teacher);
+	}
+
+	@Override
+	public List<teacher> getAllTeacher() {
+		Session session = sessionfactory.getCurrentSession();
+		String hql = "From teacher";
+		List<teacher> l = session.createQuery(hql,teacher.class).list();
+		return l;
 	}
 
 }

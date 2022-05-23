@@ -340,7 +340,9 @@ public class adminController {
 	
 	
 	@GetMapping(value = "/createteacher")
-	public String createAccountTeacher() {
+	public String createAccountTeacher(Model md) {
+		List<teacher> l = teacherService.getAllTeacher();
+		md.addAttribute("list", l);
 		return "createteacher";
 	}
 	
