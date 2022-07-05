@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
  <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+ <%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
 <div class="row">   
  <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -10,6 +12,10 @@
 </nav>
     </div>
 <h4>Khởi tạo thông qua file excel</h4>
+<sec:authorize access="hasRole('ROLE_ADMIN')">
+<span>File excel chứa thông tin đăng nhập vào hệ thống của giảng viên sau khi được khởi tạo: </span>
+<a href="<c:url value="/admin/download/file/excel"/>"class="link-primary text-decoration-none">Download File Excel</a>
+</sec:authorize>
 <form action="<c:url value="/admin/createteacher"/>"  method="POST" enctype="multipart/form-data">
 	<div class="col-8">
 	<div class="input-group">

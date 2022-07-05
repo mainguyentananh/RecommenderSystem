@@ -60,7 +60,7 @@ public class webSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/teacher/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
 		http.authorizeRequests().antMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
 		
-		http.authorizeRequests().antMatchers("/static/upload/excel/**","/static/upload/source/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
+		http.authorizeRequests().antMatchers("/static/upload/excel/**","/static/upload/source/**","/document/download/source/**").hasAnyAuthority("ROLE_ADMIN","ROLE_TEACHER");
 		
 		http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
 		

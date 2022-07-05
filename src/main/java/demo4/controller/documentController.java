@@ -353,6 +353,7 @@ public class documentController {
 
 	@PostMapping(value = "/{id}")
 	public String commentDocument(@PathVariable(value = "id") int id, @RequestParam(value = "comment") String comment) {
+		try {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		document document = documentService.getDocumentById(id);
 		Calendar calendar = Calendar.getInstance();
@@ -363,11 +364,15 @@ public class documentController {
 		feedback.setF_account(accountService.findAccountByUserName(auth.getName()));
 		feedback.setComment(comment);
 		feedbackService.saveFeedback(feedback);
+		}catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return "redirect:/document/" + id;
 	}
 
 	@GetMapping(value = "/{id}/star")
-	public String rateStarDocument(@PathVariable(value = "id") int id, @RequestParam(value = "score") int score) {
+	public String rateStarDocument(@PathVariable(value = "id") int id, @RequestParam(value = "score") int score) throws InterruptedException {
+		try {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		document document = documentService.getDocumentById(id);
 		Calendar calendar = Calendar.getInstance();
@@ -377,16 +382,20 @@ public class documentController {
 		feedback.setF_document(document);
 		feedback.setF_account(accountService.findAccountByUserName(auth.getName()));
 		feedbackService.saveFeedback(feedback);
+		}catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
 		return "redirect:/document/" + id;
 	}
 
 	@GetMapping(value = "/download/file/{id}")
 	public void downloadFile(HttpServletResponse response, @PathVariable(value = "id") int id) throws IOException {
-
+		try {
 		// get account
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	
 		document document = documentService.getDocumentById(id);
-
 		Calendar calendar = Calendar.getInstance();
 		feedback feedback = new feedback();
 		feedback.setScore(0);
@@ -394,8 +403,6 @@ public class documentController {
 		feedback.setF_document(document);
 		feedback.setF_account(accountService.findAccountByUserName(auth.getName()));
 		feedbackService.saveFeedback(feedback);
-
-		try {
 			File file = new File(app.getRealPath("/static/upload/file/" + document.getFile()));
 			byte[] data = FileUtils.readFileToByteArray(file);
 			response.setContentType("application/octet-stream");
@@ -403,9 +410,9 @@ public class documentController {
 			response.setContentLength(data.length);
 			InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
 			FileCopyUtils.copy(inputStream, response.getOutputStream());
-		} catch (Exception ex) {
+	
+		}catch(Exception ex) {
 			ex.printStackTrace();
-
 		}
 
 	}
@@ -413,9 +420,9 @@ public class documentController {
 	@GetMapping(value = "/download/source/{id}")
 	public void downloadSource(HttpServletResponse response, @PathVariable(value = "id") int id) throws IOException {
 		// get account
+		try {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		account account = accountService.findAccountByUserName(auth.getName());
-
 		document document = documentService.getDocumentById(id);
 		Calendar calendar = Calendar.getInstance();
 		feedback feedback = new feedback();
@@ -424,8 +431,6 @@ public class documentController {
 		feedback.setF_document(document);
 		feedback.setF_account(account);
 		feedbackService.saveFeedback(feedback);
-
-		try {
 			File file = new File(app.getRealPath("/static/upload/source/" + document.getSource()));
 			byte[] data = FileUtils.readFileToByteArray(file);
 			response.setContentType("application/octet-stream");

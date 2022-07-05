@@ -1,27 +1,42 @@
 package demo4.controller;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +70,7 @@ import demo4.service.userPrincipal;
 
 @Controller
 @RequestMapping(value = "/teacher")
+@PropertySource("classpath:configservice.properties")
 public class teacherController {
 
 	@Autowired
@@ -65,6 +81,9 @@ public class teacherController {
 
 	@Autowired
 	private roleService roleService;
+	
+	@Value("${config.username}")
+	private String mailServer;
 
 	@Autowired
 	private teacherService teacherService;
@@ -215,7 +234,7 @@ public class teacherController {
 						"<div class=\"alert alert-warning text-center col-4 mt-2\" role=\"alert\">Định dạng file không đúng</div>");
 				return "createclassroom";
 			}
-
+			readFile.delete();
 			md.addAttribute("notify",
 					"<div class=\"alert alert-success text-center col-4 mt-2\" role=\"alert\">Khởi tạo thành công</div>");
 			return "createclassroom";
@@ -239,9 +258,12 @@ public class teacherController {
 		String readYear = null;
 		String readSemester = null;
 		String classroomId = null;
+		String fullNameTeacher = null;
 		String readStudentId, mail, phoneNumber, fullName;
 		String[] splitName;
 		String edu = "@student.ctu.edu.vn";
+		HashMap<String,List<Object>> infoAccount = new HashMap<String, List<Object>>();
+		boolean checkFlag = false;
 		while (iterator.hasNext()) {
 
 			classroom classroom = new classroom();
@@ -252,6 +274,7 @@ public class teacherController {
 			// Get data according to row
 			if (row.getRowNum() == 2) {
 				readTeacherId = row.getCell(1).toString().replaceAll(".0$", "");
+				fullNameTeacher = row.getCell(3).toString();
 			}
 			if (row.getRowNum() == 3) {
 				readCategoryId = row.getCell(1).toString();
@@ -289,8 +312,13 @@ public class teacherController {
 				}
 
 			}
+			
+			if(row.getCell(0).toString().equalsIgnoreCase("STT")) {
+				checkFlag= true;				
+				continue;
+			}
 
-			if (row.getRowNum() > 6) {
+			if (checkFlag) {
 				readStudentId = row.getCell(1).toString();
 				// check and create student,account
 				if (!studentService.checkStudent(readStudentId)) {
@@ -319,18 +347,28 @@ public class teacherController {
 					} catch (Exception e) {
 						accountService.saveAccount(account);
 					}
-
+					
 					// handle table account_role
 					account_role account_role = new account_role();
 					account_role.setAccount(accountService.findAccountByUserName(readStudentId));
 					account_role.setRole(roleService.findRoleByRoleName("ROLE_STUDENT"));
 					account_roleService.saveAccount_Role(account_role);
 
+					
+					//create cell
+					List<Object> mailAndPassword = new ArrayList<Object>();
+					mailAndPassword.add(mail);
+					mailAndPassword.add(passwordAccount);
+					
+				
+					infoAccount.put(readStudentId,mailAndPassword);
+					
+					
 					// send account for student by mail
-					String subject = "Computer Science - Can Tho University";
-					String content = "Dear " + readStudentId + ". Login information to the system with username: "
-							+ readStudentId + " and password: " + passwordAccount;
-					mailService.sendEmail("mainguyentananh@gmail.com", mail, subject, content);
+//					String subject = "Khoa học máy tính trường Đại học Cần Thơ";
+//					String content = "Chào " + readStudentId + ". Tài khoản đăng nhập: "
+//							+ readStudentId + " và mật khẩu: " + passwordAccount;
+//					mailService.sendEmail(mailServer, mail, subject, content);
 
 				}
 
@@ -347,7 +385,130 @@ public class teacherController {
 			}
 
 		}
+		
+		
+		//file excel contain info account of student
+		XSSFWorkbook workbook2 = new XSSFWorkbook();
+		XSSFSheet sheet2 = workbook2.createSheet(classroomId);
+		XSSFFont font = workbook2.createFont();
+		font.setBold(true);
+		font.setFontHeight(14);
+		XSSFCellStyle style = workbook2.createCellStyle();
+		style.setFont(font);
+		
+		int rowNum = 0;
+		//Title row1
+		Row row_1 = sheet2.createRow(rowNum++);
+		Cell cell_10 = row_1.createCell(0);
+		cell_10.setCellValue("Danh sách tài khoản của sinh viên");
+		cell_10.setCellStyle(style);
+		
+		
+		
+		//info teacher
+		Row row_2 = sheet2.createRow(rowNum++);
+		Cell cell_20 = row_2.createCell(0);
+		cell_20.setCellValue("Mã số giảng viên");
+		cell_20.setCellStyle(style);
+				
+		Cell cell_21 = row_2.createCell(1);
+		cell_21.setCellValue(readTeacherId);
+		cell_21.setCellStyle(style);
+				
+		Cell cell_22 = row_2.createCell(2);
+		cell_22.setCellValue("Họ tên giảng viên");
+		cell_22.setCellStyle(style);
+				
+		Cell cell_23 = row_2.createCell(3);
+		cell_23.setCellValue(fullNameTeacher);
+		cell_23.setCellStyle(style);		
+		
+		
+		//detail classroom row3
+		Row row_3 = sheet2.createRow(rowNum++);
+		Cell cell_30 = row_3.createCell(0);
+		cell_30.setCellValue("Học phần");
+		cell_30.setCellStyle(style);
+		
+		Cell cell_31 = row_3.createCell(1);
+		cell_31.setCellValue(readCategoryId);
+		cell_31.setCellStyle(style);
+		
+		Cell cell_32 = row_3.createCell(2);
+		cell_32.setCellValue("Nhóm");
+		cell_32.setCellStyle(style);
+		
+		Cell cell_33 = row_3.createCell(3);
+		cell_33.setCellValue(readClassroomName);
+		cell_33.setCellStyle(style);
+		
+		
+		//year and semester row4
+		Row row_4 = sheet2.createRow(rowNum++);
+		Cell cell_40 = row_4.createCell(0);
+		cell_40.setCellValue("Năm học");
+		cell_40.setCellStyle(style);
+		
+		Cell cell_41 = row_4.createCell(1);
+		cell_41.setCellValue(readYear);
+		cell_41.setCellStyle(style);
+		
+		Cell cell_42 = row_4.createCell(2);
+		cell_42.setCellValue("Học kỳ");
+		cell_42.setCellStyle(style);
+		
+		Cell cell_43 = row_4.createCell(3);
+		cell_43.setCellValue(readSemester);
+		cell_43.setCellStyle(style);
+		
+		//info detail account for student
+		//space 2 row
+		rowNum+=2;
+		
+		//Row title account student - row7
+		Row row_7 = sheet2.createRow(rowNum++);
+		Cell cell_70 = row_7.createCell(0);
+		cell_70.setCellValue("STT");
+		cell_70.setCellStyle(style);
+		
+		Cell cell_71 = row_7.createCell(1);
+		cell_71.setCellValue("Mã số sinh viên");
+		cell_71.setCellStyle(style);
+		
+		Cell cell_72 = row_7.createCell(2);
+		cell_72.setCellValue("Mail");
+		cell_72.setCellStyle(style);
+		
+		Cell cell_73 = row_7.createCell(3);
+		cell_73.setCellValue("Mật khẩu");
+		cell_73.setCellStyle(style);
+		
+		int i = 1;
+		for (Map.Entry<String, List<Object>> entry : infoAccount.entrySet()) {
+			Row rowAccountStudent = sheet2.createRow(rowNum++);
+			Cell cell_STT = rowAccountStudent.createCell(0);
+			cell_STT.setCellValue(i++);
+			
+			Cell cell_Mssv = rowAccountStudent.createCell(1);
+			cell_Mssv.setCellValue(entry.getKey());
+			
+			Cell cell_Mail = rowAccountStudent.createCell(2);
+			cell_Mail.setCellValue(entry.getValue().get(0).toString());
+			
+			
+			Cell cell_Matkhau = rowAccountStudent.createCell(3);
+			cell_Matkhau.setCellValue(entry.getValue().get(1).toString());
+			
+		}
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String fName = "ListSV"+auth.getName()+".xlsx";
+		String path = app.getRealPath("/static/upload/excel");
+		FileOutputStream outputStream = new FileOutputStream(path+"/"+fName);
+	    workbook2.write(outputStream);
+	    outputStream.close();
 		workbook.close();
+		workbook2.close();
 	}
 
 	/* Teach */
@@ -453,5 +614,24 @@ public class teacherController {
 		md.addAttribute("notify",
 				"<div class=\"alert alert-warning text-center col-4 mt-2\" role=\"alert\">Không có nhóm do giảng viên hướng dẫn</div>");
 		return "teach";
+	}
+	
+	@GetMapping(value = "/download/file/excel")
+	public void downloadFile(HttpServletResponse response) throws IOException {
+		try {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			String fName = "ListSV"+auth.getName()+".xlsx";
+			File file = new File(app.getRealPath("/static/upload/excel/"+fName));
+			byte[] data = FileUtils.readFileToByteArray(file);
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
+			response.setContentLength(data.length);
+			InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
+			FileCopyUtils.copy(inputStream, response.getOutputStream());
+			file.delete();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 }

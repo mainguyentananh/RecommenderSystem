@@ -64,12 +64,12 @@
 								<div class="form-group">
 									<label for="username">Username</label> <input type="text"
 										class="form-control" placeholder="Your Student Code"
-										name="username">
+										name="username" required="required">
 								</div>
 								<div class="form-group  mb-3">
 									<label for="password">Password</label> <input type="password"
 										class="form-control" placeholder="Your Password"
-										name="password">
+										name="password" required="required">
 								</div>
 
 								<div class="d-sm-flex align-items-center">

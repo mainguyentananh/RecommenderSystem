@@ -10,3 +10,5 @@ public interface teachDao {
 	public List<teach> getTeachByYearAndSemester(String teacherId,String year,String semester);
 	public boolean checkTeachClassRoom(String teacherId,String classroomId);
 }
+
+	

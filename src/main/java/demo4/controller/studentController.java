@@ -3,6 +3,7 @@ package demo4.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -25,12 +26,14 @@ import demo4.model.account;
 import demo4.model.category;
 import demo4.model.document;
 import demo4.model.documentDetail;
+import demo4.model.feedback;
 import demo4.model.student;
 import demo4.model.teach;
 import demo4.service.accountService;
 import demo4.service.categoryService;
 import demo4.service.documentDetailService;
 import demo4.service.documentService;
+import demo4.service.feedbackService;
 import demo4.service.notifyService;
 import demo4.service.studentService;
 import demo4.service.teachService;
@@ -64,6 +67,9 @@ public class studentController {
 	
 	@Autowired
 	private notifyService notifyService;
+	
+	@Autowired
+	private feedbackService feedbackService;
 	
 	@Autowired
 	private ServletContext app;
@@ -192,6 +198,8 @@ public class studentController {
 		String pathFile = app.getRealPath("/static/upload/file");
 		String pathSource = app.getRealPath("/static/upload/source");
 		
+		String keyName = studentId+classroomId;
+		
 		File folderFile = new File(pathFile);
 		File folderSource = new File(pathSource);
 	
@@ -203,21 +211,37 @@ public class studentController {
 			folderSource.mkdirs();
 		}
 		
-		if (!fdocument.isEmpty()) {
-			// upload file to server
+			//check format file
 			String fileName = fdocument.getOriginalFilename();
-			File uploadFile = new File(pathFile, fileName);
-			fdocument.transferTo(uploadFile);
-			document.setFile(fileName);
-		}
-		
-		if (!srcdocument.isEmpty()) {
-			// upload source to server
+			String rp1 = fileName.replace(".", " ");
+			String[] words1 = rp1.split("\\s");
+			int index1 = words1.length;
+			String duoiMoRong1 = words1[index1 - 1];
+			
+			//check format src
 			String sourceName = srcdocument.getOriginalFilename();
-			File uploadSource = new File(pathSource, sourceName);
+			String rp2 = sourceName.replace(".", " ");
+			String[] words2 = rp2.split("\\s");
+			int index2 = words2.length;
+			String duoiMoRong2 = words2[index2 - 1];
+			
+			if(!duoiMoRong1.equalsIgnoreCase("pdf") || !duoiMoRong2.equalsIgnoreCase("rar")) {
+				md.addAttribute("notify", 1);
+				return "redirect:/student/classroom";
+			}
+			
+			// upload file to server
+			String synchronizedFileName = keyName+"."+duoiMoRong1;
+			File uploadFile = new File(pathFile, synchronizedFileName);
+			fdocument.transferTo(uploadFile);
+			document.setFile(synchronizedFileName);
+			
+			// upload source to server
+			String synchronizedSrcName = keyName+"."+duoiMoRong2;
+			File uploadSource = new File(pathSource, synchronizedSrcName);
 			srcdocument.transferTo(uploadSource);
-			document.setSource(sourceName);
-		}
+			document.setSource(synchronizedSrcName);
+		
 		
 		document.setD_category(categoryService.getCategoryById(categoryId));
 		document.setD_student(studentService.getStudentById(studentId));
@@ -233,8 +257,6 @@ public class studentController {
 			}
 		}
 		
-	
-		
 		//add new document into notify
 		demo4.model.notify no = notifyService.getNotifyById("notify");
 		 String message = no.getMessage();
@@ -248,11 +270,18 @@ public class studentController {
 		}
 		
 		
-		
-		
 		documentDetail documentDetail = documentDetailService.getDocumentDetailByPrimaryKey(classroomId, studentId);
 		documentDetail.setDd_document(document);
 		documentDetailService.updateDocumentDetail(documentDetail);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		account account = accountService.findAccountByUserName(auth.getName());
+		Calendar calendar = Calendar.getInstance();
+		feedback feedback = new feedback();
+		feedback.setScore(0);
+		feedback.setTime(calendar.getTime());
+		feedback.setF_document(document);
+		feedback.setF_account(account);
+		feedbackService.saveFeedback(feedback);
 		return "redirect:/student/classroom";
 	}
 	
@@ -296,12 +325,36 @@ public class studentController {
 			folderSource.mkdirs();
 		}
 		
+	
+		
+		//check format file
+		String fileName = fdocument.getOriginalFilename();
+		String rp1 = fileName.replace(".", " ");
+		String[] words1 = rp1.split("\\s");
+		int index1 = words1.length;
+		String duoiMoRong1 = words1[index1 - 1];
+		
+		//check format src
+		String sourceName = srcdocument.getOriginalFilename();
+		String rp2 = sourceName.replace(".", " ");
+		String[] words2 = rp2.split("\\s");
+		int index2 = words2.length;
+		String duoiMoRong2 = words2[index2 - 1];
+		
+		if(!duoiMoRong1.equalsIgnoreCase("pdf") || !duoiMoRong2.equalsIgnoreCase("rar")) {
+			md.addAttribute("notify", 1);
+			return "redirect:/student/classroom";
+		}
+		
+		String rp = updateDocument.getFile().replace(".", " ");
+		String[] words = rp.split("\\s");
+		String keyName = words[0];  //MSSV+Idclassroom
+		
 		//Delete old file 
 		String oldFileName = updateDocument.getFile();
 		File deleteOldFile = new File(pathFile,oldFileName);
 		deleteOldFile.delete();
 	
-		
 		//Delete old source
 		String oldSourceName = updateDocument.getSource();
 		File deleteOldSource = new File(pathSource,oldSourceName);
@@ -309,19 +362,18 @@ public class studentController {
 			
 			
 		// upload file to server 
-		String fileName = fdocument.getOriginalFilename();
-		File uploadFile = new File(pathFile, fileName);
+		String synchronizedFileName = keyName+"."+duoiMoRong1;
+		File uploadFile = new File(pathFile, synchronizedFileName);
 		fdocument.transferTo(uploadFile);
 		
 		
 		// upload source to server
-		String sourceName = srcdocument.getOriginalFilename();
-		File uploadSource = new File(pathSource, sourceName);
+		String synchronizedSrcName = keyName+"."+duoiMoRong2;
+		File uploadSource = new File(pathSource, synchronizedSrcName);
 		srcdocument.transferTo(uploadSource);
 	
-		
-		updateDocument.setFile(fileName);	
-		updateDocument.setSource(sourceName);
+		updateDocument.setFile(synchronizedFileName);	
+		updateDocument.setSource(synchronizedSrcName);
 		updateDocument.setName(newDocument.getName());
 		updateDocument.setSummary(newDocument.getSummary());
 		

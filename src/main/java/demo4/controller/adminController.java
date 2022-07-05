@@ -1,8 +1,12 @@
 package demo4.controller;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,11 +23,18 @@ import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,9 +42,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +64,7 @@ import demo4.model.account_role;
 import demo4.model.category;
 import demo4.model.cosinesimilarity;
 import demo4.model.document;
+import demo4.model.feedback;
 import demo4.model.teacher;
 import demo4.model.tempcosinesimilarity;
 import demo4.service.accountService;
@@ -57,11 +73,13 @@ import demo4.service.categoryService;
 import demo4.service.cosineSimilarityService;
 import demo4.service.documentService;
 import demo4.service.feedbackService;
+import demo4.service.mailService;
 import demo4.service.notifyService;
 import demo4.service.roleService;
 import demo4.service.teacherService;
 import demo4.service.tempCosineSimilarityService;
 
+@EnableAsync
 @Controller
 @RequestMapping(value = "/admin")
 @PropertySource("classpath:configservice.properties")
@@ -80,8 +98,11 @@ public class adminController {
 	@Autowired
 	private tempCosineSimilarityService tempCosineSimilarityService;
 	
-	@Value("${config.heroku}")
-	private String heroku;
+	@Value("${config.python}")
+	private String python;
+	
+	@Value("${config.username}")
+	private String mailServer;
 	
 	@Autowired
 	private ServletContext app;
@@ -103,6 +124,9 @@ public class adminController {
 	
 	@Autowired
 	private feedbackService feedbackService;
+	
+	@Autowired
+	private mailService mailService;
 	
 	@GetMapping(value = "/category")
 	public String category(Model md) {
@@ -141,6 +165,8 @@ public class adminController {
 		return "redirect:/admin/category";
 	}
 	
+
+	
 	
 	private static String readUrl(HttpURLConnection con) throws Exception {
 	    BufferedReader reader = null;
@@ -164,7 +190,7 @@ public class adminController {
 		HashMap<String, HashMap<Integer, String>> json = documentService.createJsonContainIdAndNameDocument();
 		//Request server python
 		Gson gson = new Gson();
-		String url=heroku+"cosinesimilaritybydocumentname";
+		String url=python+"cosinesimilaritybydocumentname";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
 		con.setDoOutput(true);
@@ -211,7 +237,7 @@ public class adminController {
 		//Request server python
 		Gson gson = new Gson();	
 		
-		String url=heroku+"cosinesimilaritybydocumentsummary";
+		String url=python+"cosinesimilaritybydocumentsummary";
 		URL object=new URL(url);
 		HttpURLConnection con = (HttpURLConnection) object.openConnection();
 		con.setDoOutput(true);
@@ -253,6 +279,7 @@ public class adminController {
 	
 	@GetMapping(value = "/cosinesimilarity")
 	public String cosineSimilarity(Model md) throws Exception {
+	
 		List<tempcosinesimilarity> listTempCosineSimilarity = tempCosineSimilarityService.getAllTempCosineSimilarity();
 		
 		if(!listTempCosineSimilarity.isEmpty()) {
@@ -277,17 +304,21 @@ public class adminController {
 			md.addAttribute("listTempCosineSimilarity", listTempCosineSimilarity);
 			return "cosinesimilarity";
 		}else {
-			demo4.model.notify createNotify = new demo4.model.notify();
-			createNotify.setId("notify");
-			notifyService.saveNotify(createNotify);
-			tempCosineSimilarityByDocumentName();		
-			tempCosineSimilarityByDocumentSummary();
-			return "redirect:/admin/cosinesimilarity";		
+			List<document> listDocumentInNotify = new ArrayList<document>();
+			demo4.model.notify notify = notifyService.getNotifyById("notify");
+			if(notify.getMessage() != null) {
+				String[] arrayIdDocumentToNotify = notify.getMessage().split("-");
+				for (String id : arrayIdDocumentToNotify) {
+					listDocumentInNotify.add(documentService.getDocumentById(Integer.valueOf(id)));
+				}
+			}
+			md.addAttribute("listDocumentInNotify", listDocumentInNotify);
+			return "cosinesimilarity";		
 		}
 	}
 	
 	@GetMapping(value = "/cosinesimilarity/update")
-	public String tempCosineSimilarityByKey() throws Exception {
+	public String updateCosineSimilarityByKey(){
 		List<tempcosinesimilarity> listTempCosineSimilarity = tempCosineSimilarityService.getAllTempCosineSimilarity();
 		Calendar calendar = Calendar.getInstance();
 		for (tempcosinesimilarity tempcosinesimilarity : listTempCosineSimilarity) {
@@ -373,6 +404,7 @@ public class adminController {
 	
 	@GetMapping(value = "/evaluatingsystem")
 	public String evalutingForSystem(Model md) {
+		try {
 		Object objCountAccountInSystem = accountService.countAccount();
 		List<Object[]> feedbackDocumentOfAccount = feedbackService.feedbackDocumentOfAccount();
 		
@@ -535,8 +567,6 @@ public class adminController {
 		String resultLogs= "AccountId: "+entry.getKey()+ ",documentIdFeedback: "+entry.getValue()+",DocumentRecommend:"+stringTempLogs;	
 		logs.add(resultLogs);
 		}
-		
-		
 		List<Object> listAccountFeedback = feedbackService.listAccountFeedback();
 		double evaluationAccount = Math.round(countEvaluationForAccount/countAccountInSystem * 100);
 		double evaluationItem = Math.round(countEvaluationForItem/countAccountInSystem * 100);
@@ -550,15 +580,13 @@ public class adminController {
 		
 		
 		return "evaluation";
+		}catch (Exception e) {
+			return "evaluation";
+		}	
 	}
 	
 	
-	
-	
-	
-	
-	
-	
+
 	
 	@PostMapping(value = "/createteacher", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	public String confirmCreateTeacher(@RequestParam(value = "filename") MultipartFile file, Model md)
@@ -582,26 +610,36 @@ public class adminController {
 				readExcel(readFile);
 
 			} catch (Exception e) {
-				md.addAttribute("notify",
-						"<div class=\"alert alert-warning text-center col-4 mt-2\" role=\"alert\">Định dạng file không đúng</div>");
-				return "createteacher";
+				return "redirect:/admin/createteacher";
 			}
-
-			md.addAttribute("notify",
-					"<div class=\"alert alert-success text-center col-4 mt-2\" role=\"alert\">Khởi tạo thành công</div>");
-			return "createteacher";
+			readFile.delete();
+			return "redirect:/admin/createteacher";
 		}
 		return "createteacher";
 	}
 
+	
+	public static String generateRandomPassword(int len) {
+		final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		return RandomStringUtils.random(len, chars);
+	}
+	
 	private void readExcel(File readFile) throws InvalidFormatException, IOException, MessagingException {
 		Workbook workbook = new XSSFWorkbook(readFile);
 		Sheet datatypeSheet = workbook.getSheetAt(0);
 		Iterator<Row> iterator = datatypeSheet.iterator();
+		HashMap<String,List<Object>> infoAccount = new HashMap<String, List<Object>>();
+		boolean checkFlag = false;
 		while (iterator.hasNext()) {
 			Row row = iterator.next();
-			if(row.getRowNum() > 2) {
+			if(row.getCell(0).toString().equalsIgnoreCase("STT")) {
+				checkFlag= true;
+				continue;
+			}
+			
+			if(checkFlag) {
 			String idTeacher = row.getCell(1).toString().replaceAll(".0$", "");
+			String mailTeacher = row.getCell(3).toString();
 			if(!teacherService.checkTeacher(idTeacher)) {
 
 				teacher nteacher = new teacher();
@@ -613,22 +651,121 @@ public class adminController {
 				nteacher.setImage("newteacher.jpg");
 				teacherService.saveTeacher(nteacher);
 				
+				String passwordAccount = generateRandomPassword(8);
 				BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 				account account = new account();
 				account.setUsername(idTeacher);
-				account.setPassword(encoder.encode(idTeacher));
-		
-				accountService.saveAccount(account);
+				account.setPassword(encoder.encode(passwordAccount));
+				
+				try {
+					accountService.saveAccount(account);
+				}catch (Exception e) {
+					accountService.saveAccount(account);
+				}
+				
 
 				account_role account_role = new account_role();
 				account_role.setAccount(accountService.findAccountByUserName(idTeacher));
 				account_role.setRole(roleService.findRoleByRoleName("ROLE_TEACHER"));
 				account_roleService.saveAccount_Role(account_role);
 				
+				List<Object> mailAndPassword = new ArrayList<Object>();
+				mailAndPassword.add(mailTeacher);
+				mailAndPassword.add(passwordAccount);
+				
+			
+				infoAccount.put(idTeacher,mailAndPassword);
+				
+				
+//				String subject = "Khoa học máy tính trường Đại học Cần Thơ";
+//				String content = "Chào " + idTeacher + ". Tài khoản đăng nhập: "
+//						+ idTeacher + " và mật khẩu: " + passwordAccount;
+//				mailService.sendEmail(mailServer, mailTeacher, subject, content);
 			}
 			}
 		}
+		
+		//file excel contain info account of student
+				XSSFWorkbook workbook2 = new XSSFWorkbook();
+				XSSFSheet sheet2 = workbook2.createSheet("TaiKhoanDangNhapGiangVien");
+				XSSFFont font = workbook2.createFont();
+				font.setBold(true);
+				font.setFontHeight(14);
+				XSSFCellStyle style = workbook2.createCellStyle();
+				style.setFont(font);
+				
+				int rowNum = 0;
+				//Title row1
+				Row row_1 = sheet2.createRow(rowNum++);
+				Cell cell_10 = row_1.createCell(0);
+				cell_10.setCellValue("Danh sách tài khoản của giảng viên");
+				cell_10.setCellStyle(style);
+				
+				Row row_2 = sheet2.createRow(rowNum++);
+				Cell cell_20 = row_2.createCell(0);
+				cell_20.setCellValue("STT");
+				cell_20.setCellStyle(style);
+				
+				Cell cell_21 = row_2.createCell(1);
+				cell_21.setCellValue("Mã số giảng viên");
+				cell_21.setCellStyle(style);
+				
+				Cell cell_22 = row_2.createCell(2);
+				cell_22.setCellValue("Mail");
+				cell_22.setCellStyle(style);
+				
+				Cell cell_23 = row_2.createCell(3);
+				cell_23.setCellValue("Mật khẩu");
+				cell_23.setCellStyle(style);
+				
+				int i = 1;
+				for (Map.Entry<String, List<Object>> entry : infoAccount.entrySet()) {
+					Row rowAccountTeacher = sheet2.createRow(rowNum++);
+					Cell cell_STT = rowAccountTeacher.createCell(0);
+					cell_STT.setCellValue(i++);
+					
+					Cell cell_Msgv = rowAccountTeacher.createCell(1);
+					cell_Msgv.setCellValue(entry.getKey());
+					
+					Cell cell_Mail = rowAccountTeacher.createCell(2);
+					cell_Mail.setCellValue(entry.getValue().get(0).toString());
+					
+					
+					Cell cell_Matkhau = rowAccountTeacher.createCell(3);
+					cell_Matkhau.setCellValue(entry.getValue().get(1).toString());
+					
+				}
+				Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+				String fName = "ListGV"+auth.getName()+".xlsx";
+				String path = app.getRealPath("/static/upload/excel");
+				FileOutputStream outputStream = new FileOutputStream(path+"/"+fName);
+			    workbook2.write(outputStream);
+			    outputStream.close();
 		workbook.close();
+		workbook2.close();
 	}
+	
+	
+	
+	@GetMapping(value = "/download/file/excel")
+	public void downloadFile(HttpServletResponse response) throws IOException {
+		try {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			String fName = "ListGV"+auth.getName()+".xlsx";
+			File file = new File(app.getRealPath("/static/upload/excel/"+fName));
+			byte[] data = FileUtils.readFileToByteArray(file);
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
+			response.setContentLength(data.length);
+			InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
+			FileCopyUtils.copy(inputStream, response.getOutputStream());
+			file.delete();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+	
+	
 	
 }
